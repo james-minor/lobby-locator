@@ -14,6 +14,8 @@ A Python-based Discord bot to search for players who own specific games, using t
 
 ## Developing
 
+### Creating Virtual Environment
+
 When pulling from the Repository, you will have to build the Virtual Environment from
 the `requirements.txt` file. To build the Virtual Environment run the following command:
 
@@ -26,3 +28,9 @@ To generate your `requirements.txt` file from an **existing version** of the rep
 ```bash
 pip3 freeze > requirements.txt
 ```
+
+### Gathering API Tokens
+
+For Security reasons, API tokens and keys should obviously **never** be shared in any repository. It is for that reason
+that we store any tokens in ```.env``` file, the schema for the ```.env``` file can be found in the ```.env.example``` 
+file.
