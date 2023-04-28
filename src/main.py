@@ -42,7 +42,7 @@ async def set_id_command(ctx, steam_id: str):
     await ctx.respond(f'Setting Steam ID: **{steam_id}**, for user: **{ctx.author}**')
     print(f'Setting Steam ID: {steam_id}, for user: {ctx.author}')
 
-    file_path = os.path.join(os.getcwd(), 'accounts.json')
+    file_path = os.path.join(os.getcwd(), '../accounts.json')
     if os.path.exists(file_path):
         with open(file_path, 'r+') as user_data_file:
             user_data = json.load(user_data_file)
@@ -150,7 +150,7 @@ def get_users_who_own_game(game_id: str):
 
     # Getting the user data from accounts.json
     user_accounts = None
-    file_path = os.path.join(os.getcwd(), 'accounts.json')
+    file_path = os.path.join(os.getcwd(), '../accounts.json')
     if os.path.exists(file_path):
         with open(file_path, 'r') as user_data_file:
             user_accounts = json.load(user_data_file)['accounts']
