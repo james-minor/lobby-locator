@@ -117,9 +117,7 @@ async def on_ready():
 
 
 class GameSelectView(discord.ui.Select):
-    def __init__(self, context, game_titles):
-        self.context = context
-
+    def __init__(self, game_titles: list):
         options = list()
         for title in game_titles:
             options.append(discord.SelectOption(label=str(title)))
@@ -150,6 +148,7 @@ async def ping_command(ctx, game_title: str):
         """
     )
     game_title_list = game_title_cursor.fetchall()
+    game_title_cursor.close()
 
     # Finding the closest match to the passed game title.
     closest_matches = difflib.get_close_matches(game_title, game_title_list, 5)
@@ -162,15 +161,102 @@ async def ping_command(ctx, game_title: str):
 
     # If there is an exact match for the game title, ping all users who own that game.
     if game_title in closest_matches:
-        # TODO: ping users when an exact match is found.
-        await ctx.respond(f'TODO: ping users when an exact match is found.')
+        discord_ids = get_discord_ids_for_game(game_title)
+
+        # Checking to see if anyone besides the context author owns the game.
+        if len(discord_ids) == 0:
+            await ctx.respond(f'Uh oh! It looks like nobody owns **{game_title}**.')
+            return
+        elif len(discord_ids) == 1 and discord_ids[0] == str(ctx.author.id):
+            await ctx.respond(f'It looks like you are the only person who owns **{game_title}**.')
+            return
+
+        # Generating a string of user pings to append to the  message.
+        ping_string = ''
+        for discord_id in discord_ids:
+            if discord_id != ctx.author.id:
+                ping_string += f'<@{str(discord_id)}> '
+        await ctx.respond(f'**{ctx.author}** is looking to play **{game_title}** ' + ping_string)
+
         return
 
     # Creating a new GameSelectView if the game title did not have an exact match.
     select_menu = discord.ui.View(timeout=10)
-    select_menu.add_item(GameSelectView(ctx, closest_matches))
+    select_menu.add_item(GameSelectView(closest_matches))
 
     await ctx.respond('Please select a game to find players for:', view=select_menu)
+
+
+def get_discord_ids_for_game(game_title) -> list:
+    """
+    Returns a list of Discord IDs who own a passed game title.
+    :param game_title: The game title to gather IDs for.
+    :return: A string list of Discord IDs.
+    """
+
+    type_cursor = sql_connection.cursor()
+
+    # Seeing if the game is a custom game.
+    type_cursor.execute(
+        """
+        SELECT COUNT(*) FROM tb_custom_games
+        WHERE game_title = ?
+        """,
+        [game_title]
+    )
+
+    # The game is a custom game, gather Discord IDs from tb_owned_custom_games.
+    if type_cursor.fetchone()[0] != 0:
+        game_cursor = sql_connection.cursor()
+        game_cursor.row_factory = lambda cursor, row: row[0]
+        game_cursor.execute(
+            """
+            SELECT discord_id FROM tb_owned_custom_games
+            WHERE game_title = ?
+            """,
+            [game_title]
+        )
+
+        discord_ids = game_cursor.fetchall()
+        type_cursor.close()
+        game_cursor.close()
+        return discord_ids
+
+    output = list()
+
+    # Getting the Steam game ID.
+    steam_cursor = sql_connection.cursor()
+    steam_cursor.execute(
+        """
+        SELECT steam_id, game_title FROM tb_steam_games
+        WHERE game_title = ?;
+        """,
+        [game_title]
+    )
+    steam_game_ids = steam_cursor.fetchall()
+    print(steam_game_ids)
+
+    # Fetching all user data from the users table.
+    user_cursor = sql_connection.cursor()
+    user_cursor.execute(
+        """
+        SELECT discord_id, steam_id FROM tb_users
+        """
+    )
+    users = user_cursor.fetchall()
+
+    # Seeing if the user owns the Steam game via the Steam API.
+    for user in users:
+        api_uri = f'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={os.getenv("STEAM_API_KEY")}&steamid={user[1]}'
+        response = requests.get(api_uri)
+
+        if response.status_code == 200:
+            user_game_ids = {d['appid'] for d in json.loads(response.content)['response']['games']}
+
+    type_cursor.close()
+    steam_cursor.close()
+    user_cursor.close()
+    return output
 
 
 # Adding cogs to the bot.
