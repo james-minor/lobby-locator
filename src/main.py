@@ -9,8 +9,8 @@ import sqlite3
 from sqlite3 import Error
 
 import discord
-from src.cogs.Game import Game
-from src.cogs.Steam import Steam
+from cogs.Game import Game
+from cogs.Steam import Steam
 
 # Defining constants.
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
