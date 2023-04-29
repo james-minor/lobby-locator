@@ -53,15 +53,6 @@ class Steam(commands.Cog):
     async def remove_command(self, ctx):
         cursor = self.connection.cursor()
 
-        # Removing any entries from tb_owned_custom_games table.
-        cursor.execute(
-            """
-            DELETE FROM tb_owned_custom_games
-            WHERE discord_id = ?;
-            """,
-            [ctx.author.id]
-        )
-
         # Removing the user entry from tb_users.
         cursor.execute(
             """
