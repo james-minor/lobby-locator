@@ -12,9 +12,13 @@ import discord
 from src.cogs.Game import Game
 from src.cogs.Steam import Steam
 
+# Creating the data folder, if it doesn't already exist.
+# TODO: do that ^
+
 # Attempting to connect to the SQLite database.
 sql_connection = None
 try:
+    # TODO: unlink this sqlite file from this file path specifically.
     sql_connection = sqlite3.connect(r'C:\Programming\game_seeker_discord_bot\data\database.sqlite')
 except Error as error:
     print('DATABASE ERROR: ' + str(error))
