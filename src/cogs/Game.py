@@ -78,8 +78,51 @@ class Game(commands.Cog):
 
     @game.command(name="register", description="Registers a custom game as connected to your account.")
     async def register_user_command(self, ctx, game_title: str):
-        await ctx.respond(f'Registering custom game **{game_title}** for **{ctx.author}**.')
-        # TODO: implement behavior
+        cursor = self.connection.cursor()
+
+        # Validating that the custom game exists in tb_custom_games.
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM tb_custom_games
+            WHERE game_title = ?;
+            """,
+            [game_title]
+        )
+        if cursor.fetchone()[0] == 0:
+            await ctx.respond(
+                f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.'
+            )
+            print(f'{ctx.author} tried to register non-added game "{game_title}"...')
+            return
+
+        # Validating that this game is NOT already registered to the current user.
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM tb_owned_custom_games
+            WHERE game_title = ?
+                AND discord_id = ?;
+            """,
+            [game_title, ctx.author.id]
+        )
+
+        # If the user does not have this game registered, register this game to their account.
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(
+                """
+                INSERT INTO tb_owned_custom_games(game_title, discord_id)
+                VALUES(?, ?)
+                """,
+                [game_title, ctx.author.id]
+            )
+
+            await ctx.respond(f'Registered custom game **{game_title}** for **{ctx.author}**.')
+            print(f'Registered custom game {game_title} for {ctx.author}...')
+        else:
+            await ctx.respond(f'Your account is already registered for **{game_title}**!')
+
+        # Committing action to the database.
+        cursor.close()
+        self.connection.commit()
 
     @game.command(name="unregister", description="Unregisters a custom game as connected to your account.")
     async def register_custom_game_command(self, ctx, game_title: str):
