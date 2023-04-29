@@ -42,8 +42,16 @@ class Game(commands.Cog):
     @game.command(name='remove', description="Removes a custom game from the games database.")
     @commands.has_permissions(administrator=True)
     async def remove_game_command(self, ctx, game_title: str):
-        await ctx.respond(f'Removing custom game **{game_title}**.')
-        # TODO: implement behavior
+        cursor = self.connection.cursor()
+        cursor.execute(
+            """
+            DELETE FROM tb_custom_games
+            WHERE game_title = ?;
+            """,
+            [game_title]
+        )
+
+        await ctx.respond(f'Removed custom game **{game_title}**.')
 
     @game.command(name="register", description="Registers a custom game as connected to your account.")
     async def register_user_command(self, ctx, game_title: str):
