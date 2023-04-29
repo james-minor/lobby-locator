@@ -128,7 +128,22 @@ class Game(commands.Cog):
     async def unregister_custom_game_command(self, ctx, game_title: str):
         cursor = self.connection.cursor()
 
-        # Deleting the user's custom game entry.
+        # Checking to see if the requested custom game title exists.
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM tb_custom_games
+            WHERE game_title = ?;
+            """,
+            [game_title]
+        )
+        if cursor.fetchone()[0] == 0:
+            cursor.close()
+            await ctx.respond(
+                f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.'
+            )
+            return
+
+        # If the custom game exists, deleting the user's custom game entry.
         cursor.execute(
             """
             DELETE FROM tb_owned_custom_games
@@ -144,3 +159,27 @@ class Game(commands.Cog):
 
         await ctx.respond(f'Unregistered **{game_title}** from your account.')
         print(f'{ctx.author} unregistered "{game_title}" from their account...')
+
+    @game.command(name="list", description="Lists the game titles in the custom games library")
+    async def list_custom_game_command(self, ctx):
+        title_cursor = self.connection.cursor()
+
+        # Validating that there are any custom games.
+        title_cursor.execute('SELECT COUNT(*) FROM tb_custom_games')
+        if title_cursor.fetchone()[0] == 0:
+            title_cursor.close()
+            await ctx.respond('There are no custom games, please contact an admin to add to the custom game library.')
+            return
+
+        # Fetching all the game titles from tb_custom_games.
+        title_cursor.row_factory = lambda cursor, row: row[0]
+        title_cursor.execute('SELECT game_title FROM tb_custom_games;')
+
+        # Creating a string list of every custom game title.
+        output_string = '```' + '\n' + 'Custom Game Library Titles:\n'
+        for title in title_cursor.fetchall():
+            output_string += '- ' + str(title) + '\n'
+        output_string += '```'
+
+        title_cursor.close()
+        await ctx.respond(output_string)
