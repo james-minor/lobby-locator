@@ -6,11 +6,11 @@ import requests
 import json
 
 import sqlite3
-from sqlite3 import Error, Cursor
+from sqlite3 import Error
 
 import discord
-from discord.ext import commands
-
+from src.cogs.Game import Game
+from src.cogs.Steam import Steam
 
 # Attempting to connect to the SQLite database.
 sql_connection = None
@@ -115,61 +115,6 @@ async def on_ready():
     print(f'{bot.user} is now online!')
 
 
-@bot.slash_command(name='set', description='Sets your saved Steam ID')
-async def set_id_command(ctx, steam_id: str):
-    await ctx.respond(f'Setting Steam ID: **{steam_id}**, for user: **{ctx.author}**')
-
-    # Seeing if an entry for this user already exists, if so UPDATE instead of INSERTING data.
-    cursor = sql_connection.cursor()
-    cursor.execute(
-        """
-        SELECT COUNT(*) FROM tb_users
-        WHERE discord_id = ?
-        """,
-        [ctx.author.id]
-    )
-    if cursor.fetchone()[0] == 0:
-        print(f'Inserting Steam ID data for user: {ctx.author}...')
-        cursor.execute(
-            """
-            INSERT INTO tb_users(discord_tag, discord_id, steam_id)
-            VALUES(?, ?, ?);
-            """,
-            [str(ctx.author), str(ctx.author.id), str(steam_id)]
-        )
-    else:
-        print(f'Updating Steam ID data for user: {ctx.author}...')
-        cursor.execute(
-            """
-            UPDATE tb_users
-            SET discord_tag = ?, steam_id = ?
-            WHERE discord_id = ?;
-            """,
-            [str(ctx.author), str(steam_id), str(ctx.author.id)]
-        )
-
-    cursor.close()
-    sql_connection.commit()
-
-
-@bot.slash_command(name='remove', description='Removes your saved Steam ID')
-async def remove_id_command(ctx):
-    await ctx.respond(f'Removing Steam ID for **{ctx.author}**.')
-    print(f'Removing Steam ID for {ctx.author}')
-
-    cursor = sql_connection.cursor()
-    cursor.execute(
-        """
-        DELETE FROM tb_users
-        WHERE discord_id = ?;
-        """,
-        [ctx.author.id]
-    )
-
-    cursor.close()
-    sql_connection.commit()
-
-
 class GameSelectView(discord.ui.Select):
     def __init__(self, game_titles):
         options = list()
@@ -188,33 +133,7 @@ class GameSelectView(discord.ui.Select):
         # TODO: ping users who own the game
 
 
-@bot.slash_command(name='add_custom_game', description="Adds a custom game to the games database.")
-@commands.has_permissions(administrator=True)
-async def add_custom_game_command(ctx, game_title: str):
-    await ctx.respond(f'Adding custom game **{game_title}**.')
-    # TODO: implement behavior
-
-
-@bot.slash_command(name='remove_custom_game', description="Removes a custom game from the games database.")
-@commands.has_permissions(administrator=True)
-async def remove_custom_game_command(ctx, game_title: str):
-    await ctx.respond(f'Removing custom game **{game_title}**.')
-    # TODO: implement behavior
-
-
-@bot.slash_command(name="register_custom_game_for_me", description="Registers a custom game as connected to your account.")
-async def register_custom_game_command(ctx, game_title: str):
-    await ctx.respond(f'Registering custom game **{game_title}** for **{ctx.author}**.')
-    # TODO: implement behavior
-
-
-@bot.slash_command(name="remove_custom_game_for_me", description="Unregisters a custom game as connected to your account.")
-async def register_custom_game_command(ctx, game_title: str):
-    await ctx.respond(f'Unregistering custom game **{game_title}** for **{ctx.author}**.')
-    # TODO: implement behavior
-
-
-@bot.slash_command(name='ping', description='Pings any users who own a game')
+@bot.slash_command(name='ping', description='Pings any users who own the specified game title')
 async def ping_command(ctx, game_title: str):
     game_title_cursor = sql_connection.cursor()
 
@@ -308,5 +227,9 @@ async def ping_command(ctx, game_title: str):
 # def get_ping_string(game_title: str):
 #     print('hello world')
 
+# Adding cogs to the bot.
+bot.add_cog(Steam(bot, sql_connection))
+bot.add_cog(Game(bot, sql_connection))
 
+# Starting the bot.
 bot.run(os.getenv('DISCORD_TOKEN'))
