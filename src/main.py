@@ -74,8 +74,6 @@ create_database_tables()
 def get_steam_app_data() -> None:
     """
     Gathers the name and App ID of every application on Steam.
-
-    :param cursor: The SQL database cursor to use to add to the database.
     :return: None
     """
     response = requests.get('https://api.steampowered.com/ISteamApps/GetAppList/v0002')
