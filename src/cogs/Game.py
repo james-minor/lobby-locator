@@ -126,5 +126,21 @@ class Game(commands.Cog):
 
     @game.command(name="unregister", description="Unregisters a custom game as connected to your account.")
     async def register_custom_game_command(self, ctx, game_title: str):
-        await ctx.respond(f'Unregistering custom game **{game_title}** for **{ctx.author}**.')
-        # TODO: implement behavior
+        cursor = self.connection.cursor()
+
+        # Deleting the user's custom game entry.
+        cursor.execute(
+            """
+            DELETE FROM tb_owned_custom_games
+            WHERE game_title = ?
+                AND discord_id = ?;
+            """,
+            [game_title, ctx.author.id]
+        )
+
+        # Committing action to the database.
+        cursor.close()
+        self.connection.commit()
+
+        await ctx.respond(f'Unregistered **{game_title}** from your account.')
+        print(f'{ctx.author} unregistered "{game_title}" from their account...')
