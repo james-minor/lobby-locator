@@ -94,16 +94,19 @@ async def on_ready():
 
 
 class GameSelectView(discord.ui.Select):
+
+    options = list()
+
     def __init__(self, game_titles: list):
-        options = list()
+        self.options = list()
         for title in game_titles:
-            options.append(discord.SelectOption(label=str(title)))
+            self.options.append(discord.SelectOption(label=str(title)))
 
         super().__init__(
             placeholder='Choose a game title!',
             min_values=1,
             max_values=1,
-            options=options
+            options=self.options
         )
 
     async def callback(self, interaction):
