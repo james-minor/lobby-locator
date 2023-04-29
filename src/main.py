@@ -11,14 +11,11 @@ from sqlite3 import Error, Cursor
 import discord
 from discord.ext import commands
 
+
 # Attempting to connect to the SQLite database.
 sql_connection = None
-
-# TODO: cursors should be local, we should avoid having a global cursor.
-sql_cursor = None
 try:
     sql_connection = sqlite3.connect(r'C:\Programming\game_seeker_discord_bot\data\database.sqlite')
-    sql_cursor = sql_connection.cursor()
 except Error as error:
     print('DATABASE ERROR: ' + str(error))
     print('Aborting bot startup...')
@@ -64,13 +61,14 @@ def create_database_tables() -> None:
         );
         """
     )
+    cursor.close()
 
 
 # Initializing the SQLite database tables.
 create_database_tables()
 
 
-def get_steam_app_data(cursor: Cursor) -> None:
+def get_steam_app_data() -> None:
     """
     Gathers the name and App ID of every application on Steam.
 
@@ -82,6 +80,7 @@ def get_steam_app_data(cursor: Cursor) -> None:
         print('Acquired application data from Steam!')
 
         # Converting the acquired JSON data to a Python dictionary.
+        cursor = sql_connection.cursor()
         for app in json.loads(response.content)['applist']['apps']:
             cursor.execute(
                 """
@@ -93,13 +92,14 @@ def get_steam_app_data(cursor: Cursor) -> None:
 
         cursor.execute("SELECT COUNT(*) FROM tb_steam_games;")
         print(f'Inserted {cursor.fetchone()[0]} game IDs into tb_steam_games...')
+        cursor.close()
     else:
         print('Could not acquire application data from Steam servers, aborting bot startup...')
         quit()
 
 
 # Gathering the Steam application data.
-get_steam_app_data(sql_cursor)
+get_steam_app_data()
 sql_connection.commit()
 
 # Getting the API keys from the dotEnv file.
@@ -120,16 +120,17 @@ async def set_id_command(ctx, steam_id: str):
     await ctx.respond(f'Setting Steam ID: **{steam_id}**, for user: **{ctx.author}**')
 
     # Seeing if an entry for this user already exists, if so UPDATE instead of INSERTING data.
-    sql_cursor.execute(
+    cursor = sql_connection.cursor()
+    cursor.execute(
         """
         SELECT COUNT(*) FROM tb_users
         WHERE discord_id = ?
         """,
         [ctx.author.id]
     )
-    if sql_cursor.fetchone()[0] == 0:
+    if cursor.fetchone()[0] == 0:
         print(f'Inserting Steam ID data for user: {ctx.author}...')
-        sql_cursor.execute(
+        cursor.execute(
             """
             INSERT INTO tb_users(discord_tag, discord_id, steam_id)
             VALUES(?, ?, ?);
@@ -138,7 +139,7 @@ async def set_id_command(ctx, steam_id: str):
         )
     else:
         print(f'Updating Steam ID data for user: {ctx.author}...')
-        sql_cursor.execute(
+        cursor.execute(
             """
             UPDATE tb_users
             SET discord_tag = ?, steam_id = ?
@@ -147,6 +148,7 @@ async def set_id_command(ctx, steam_id: str):
             [str(ctx.author), str(steam_id), str(ctx.author.id)]
         )
 
+    cursor.close()
     sql_connection.commit()
 
 
@@ -155,13 +157,16 @@ async def remove_id_command(ctx):
     await ctx.respond(f'Removing Steam ID for **{ctx.author}**.')
     print(f'Removing Steam ID for {ctx.author}')
 
-    sql_cursor.execute(
+    cursor = sql_connection.cursor()
+    cursor.execute(
         """
         DELETE FROM tb_users
         WHERE discord_id = ?;
         """,
         [ctx.author.id]
     )
+
+    cursor.close()
     sql_connection.commit()
 
 
