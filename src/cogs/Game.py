@@ -125,7 +125,7 @@ class Game(commands.Cog):
         self.connection.commit()
 
     @game.command(name="unregister", description="Unregisters a custom game as connected to your account.")
-    async def register_custom_game_command(self, ctx, game_title: str):
+    async def unregister_custom_game_command(self, ctx, game_title: str):
         cursor = self.connection.cursor()
 
         # Deleting the user's custom game entry.
