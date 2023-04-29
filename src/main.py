@@ -15,20 +15,9 @@ from src.cogs.Steam import Steam
 # Defining constants.
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-# Creating the data directory, if it doesn't already exist.
-if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
-    os.makedirs('data')
-    print('Created data directory!')
-
-# Attempting to connect to the SQLite database.
-sql_connection = None
-try:
-    sql_connection = sqlite3.connect(os.path.join(ROOT_DIRECTORY, 'data', 'database.sqlite'))
-except Error as error:
-    print('DATABASE ERROR: ' + str(error))
-    print('Aborting bot startup...')
-    quit()
-print('Successfully created a connection to the database!')
+# Setting the bot intents and initializing the bot.
+intents = discord.Intents.all()  # TODO: enable proper intents, we dont need all of them (helps with development)
+bot = discord.Bot(intents=intents)
 
 
 def create_database_tables() -> None:
@@ -71,10 +60,6 @@ def create_database_tables() -> None:
     cursor.close()
 
 
-# Initializing the SQLite database tables.
-create_database_tables()
-
-
 def get_steam_app_data() -> None:
     """
     Gathers the name and App ID of every application on Steam.
@@ -101,18 +86,6 @@ def get_steam_app_data() -> None:
     else:
         print('Could not acquire application data from Steam servers, aborting bot startup...')
         quit()
-
-
-# Gathering the Steam application data.
-get_steam_app_data()
-sql_connection.commit()
-
-# Getting the API keys from the dotEnv file.
-dotenv.load_dotenv()
-
-# Setting the bot intents and initializing the bot.
-intents = discord.Intents.all()  # TODO: enable proper intents, we dont need all of them (helps with development)
-bot = discord.Bot(intents=intents)
 
 
 @bot.event
@@ -280,9 +253,35 @@ def get_discord_ids_for_game(game_title) -> list:
     return output
 
 
-# Adding cogs to the bot.
-bot.add_cog(Steam(bot, sql_connection))
-bot.add_cog(Game(bot, sql_connection))
+if __name__ == '__main__':
+    # Creating the data directory, if it doesn't already exist.
+    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
+        os.makedirs('data')
+        print('Created data directory!')
 
-# Starting the bot.
-bot.run(os.getenv('DISCORD_TOKEN'))
+    # Attempting to connect to the SQLite database.
+    sql_connection = None
+    try:
+        sql_connection = sqlite3.connect(os.path.join(ROOT_DIRECTORY, 'data', 'database.sqlite'))
+    except Error as error:
+        print('DATABASE ERROR: ' + str(error))
+        print('Aborting bot startup...')
+        quit()
+    print('Successfully created a connection to the database!')
+
+    # Initializing the SQLite database tables.
+    create_database_tables()
+
+    # Gathering the Steam application data.
+    get_steam_app_data()
+    sql_connection.commit()
+
+    # Getting the API keys from the dotEnv file.
+    dotenv.load_dotenv()
+
+    # Adding cogs to the bot.
+    bot.add_cog(Steam(bot, sql_connection))
+    bot.add_cog(Game(bot, sql_connection))
+
+    # Starting the bot.
+    bot.run(os.getenv('DISCORD_TOKEN'))
