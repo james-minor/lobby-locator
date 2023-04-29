@@ -1,7 +1,5 @@
 # Looking to Play Discord Bot
 
-
-
 <div style="text-align: center;">
 
    [![Minimum Python Version](https://img.shields.io/badge/Python-%3E%3D3.10-green.svg)](https://www.python.org/)
