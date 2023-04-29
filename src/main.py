@@ -116,7 +116,9 @@ async def on_ready():
 
 
 class GameSelectView(discord.ui.Select):
-    def __init__(self, game_titles):
+    def __init__(self, context, game_titles):
+        self.context = context
+
         options = list()
         for title in game_titles:
             options.append(discord.SelectOption(label=str(title)))
@@ -130,7 +132,7 @@ class GameSelectView(discord.ui.Select):
 
     async def callback(self, interaction):
         await interaction.response.send_message(f'Attempting to ping users who own **{self.values[0]}**...')
-        # TODO: ping users who own the game
+        # TODO: ping users who own the selected game using self.context
 
 
 @bot.slash_command(name='ping', description='Pings any users who own the specified game title')
@@ -138,6 +140,7 @@ async def ping_command(ctx, game_title: str):
     game_title_cursor = sql_connection.cursor()
 
     # Getting a list of every registered game name (both from steam and custom games).
+    game_title_cursor.row_factory = lambda cursor, row: row[0]
     game_title_cursor.execute(
         """
         SELECT game_title FROM tb_steam_games
@@ -155,6 +158,18 @@ async def ping_command(ctx, game_title: str):
     if len(closest_matches) == 0:
         await ctx.respond(f'Sorry, I could not find any games matching **{game_title}**.')
         return
+
+    # If there is an exact match for the game title, ping all users who own that game.
+    if game_title in closest_matches:
+        # TODO: ping users when an exact match is found.
+        await ctx.respond(f'TODO: ping users when an exact match is found.')
+        return
+
+    # Creating a new GameSelectView if the game title did not have an exact match.
+    select_menu = discord.ui.View(timeout=10)
+    select_menu.add_item(GameSelectView(ctx, closest_matches))
+
+    await ctx.respond('Please select a game to find players for:', view=select_menu)
 
 #     # TODO: implement SQLite behavior.
 #     return  # TODO: remove line and code below.
