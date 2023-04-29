@@ -51,10 +51,18 @@ class Steam(commands.Cog):
 
     @steam.command(name='remove', description='Removes your saved Steam ID')
     async def remove_command(self, ctx):
-        await ctx.respond(f'Removing Steam ID for **{ctx.author}**.')
-        print(f'Removing Steam ID for {ctx.author}')
-
         cursor = self.connection.cursor()
+
+        # Removing any entries from tb_owned_custom_games table.
+        cursor.execute(
+            """
+            DELETE FROM tb_owned_custom_games
+            WHERE discord_id = ?;
+            """,
+            [ctx.author.id]
+        )
+
+        # Removing the user entry from tb_users.
         cursor.execute(
             """
             DELETE FROM tb_users
@@ -63,5 +71,10 @@ class Steam(commands.Cog):
             [ctx.author.id]
         )
 
+        # Committing action to the database.
         cursor.close()
         self.connection.commit()
+
+        await ctx.respond(f'Removing Steam ID for **{ctx.author}**.')
+        print(f'Removing Steam ID for {ctx.author}')
+
