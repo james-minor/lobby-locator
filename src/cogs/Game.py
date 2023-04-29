@@ -35,6 +35,11 @@ class Game(commands.Cog):
                 """,
                 [game_title]
             )
+
+            # Committing action to the database.
+            cursor.close()
+            self.connection.commit()
+
             await ctx.respond(f'Added custom game **{game_title}**.')
             print(f'{ctx.author} added custom game "{game_title}"...')
         else:
@@ -63,6 +68,10 @@ class Game(commands.Cog):
             """,
             [game_title]
         )
+
+        # Committing action to the database.
+        cursor.close()
+        self.connection.commit()
 
         await ctx.respond(f'Removed custom game **{game_title}**.')
         print(f'{ctx.author} removed custom game "{game_title}"...')
