@@ -60,8 +60,7 @@ def create_database_tables() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_title VARCHAR(100) NOT NULL,
             discord_id VARCHAR(18) NOT NULL,
-            FOREIGN KEY(game_title) REFERENCES tb_custom_games(game_title),
-            FOREIGN KEY(discord_id) REFERENCES tb_users(discord_id)
+            FOREIGN KEY(game_title) REFERENCES tb_custom_games(game_title)
         );
         """
     )
