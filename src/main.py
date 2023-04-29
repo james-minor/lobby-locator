@@ -130,8 +130,22 @@ class GameSelectView(discord.ui.Select):
         )
 
     async def callback(self, interaction):
-        await interaction.response.send_message(f'Attempting to ping users who own **{self.values[0]}**...')
-        # TODO: ping users who own the selected game using self.context
+        discord_ids = get_discord_ids_for_game(self.values[0])
+
+        # Checking to see if anyone besides the context author owns the game.
+        if len(discord_ids) == 0:
+            await interaction.response.send_message(f'Uh oh! It looks like nobody owns **{self.values[0]}**.')
+            return
+        elif len(discord_ids) == 1 and discord_ids[0] == str(interaction.user.id):
+            await interaction.response.send_message(f'It looks like you are the only person who owns **{self.values[0]}**.')
+            return
+
+        # Generating a string of user pings to append to the  message.
+        ping_string = ''
+        for discord_id in discord_ids:
+            if discord_id != str(interaction.user.id):
+                ping_string += f'<@{str(discord_id)}> '
+        await interaction.response.send_message(f'**{interaction.user}** is looking to play **{self.values[0]}** ' + ping_string)
 
 
 @bot.slash_command(name='ping', description='Pings any users who own the specified game title')
