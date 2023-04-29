@@ -12,8 +12,13 @@ import discord
 from src.cogs.Game import Game
 from src.cogs.Steam import Steam
 
-# Creating the data folder, if it doesn't already exist.
-# TODO: do that ^
+# Defining constants.
+ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Creating the data directory, if it doesn't already exist.
+if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
+    os.makedirs('data')
+    print('Created data directory!')
 
 # Attempting to connect to the SQLite database.
 sql_connection = None
