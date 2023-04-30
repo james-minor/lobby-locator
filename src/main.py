@@ -12,7 +12,7 @@ import discord
 from cogs.Game import Game
 from cogs.Steam import Steam
 
-from src.logging.Logger import Logger
+from bot_logging.Logger import Logger
 
 # Defining constants.
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
