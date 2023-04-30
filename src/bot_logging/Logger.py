@@ -1,6 +1,6 @@
 import os
 
-from src.logging.LogLevel import LogLevel
+from . LogLevel import LogLevel
 from datetime import datetime
 
 
