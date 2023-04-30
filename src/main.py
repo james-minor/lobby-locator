@@ -262,6 +262,11 @@ if __name__ == '__main__':
         os.makedirs('data')
         print('Created data directory!')
 
+    # Creating the logs directory, if it doesn't already exist.
+    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
+        os.makedirs('logs')
+        print('Created logs directory!')
+
     # Attempting to connect to the SQLite database.
     sql_connection = None
     try:
