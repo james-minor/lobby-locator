@@ -4,14 +4,17 @@ import discord
 from discord import Bot
 from discord.ext import commands
 
+from src.logging.Logger import Logger
+
 
 class Steam(commands.Cog):
 
     steam = discord.SlashCommandGroup('steam', 'Editing saved Steam IDs')
 
-    def __init__(self, bot: Bot, sql_connection: Connection):
+    def __init__(self, bot: Bot, sql_connection: Connection, logger: Logger):
         self.bot = bot
         self.connection = sql_connection
+        self.logger = logger
 
     @steam.command(name='set', description='Sets your saved Steam ID')
     async def set_command(self, ctx, steam_id: str):
@@ -27,7 +30,7 @@ class Steam(commands.Cog):
             [ctx.author.id]
         )
         if cursor.fetchone()[0] == 0:
-            print(f'Inserting Steam ID data for user: {ctx.author}...')
+            self.logger.info(f'Inserting Steam ID data for user: {ctx.author}...')
             cursor.execute(
                 """
                 INSERT INTO tb_users(discord_tag, discord_id, steam_id)
@@ -36,7 +39,7 @@ class Steam(commands.Cog):
                 [str(ctx.author), str(ctx.author.id), str(steam_id)]
             )
         else:
-            print(f'Updating Steam ID data for user: {ctx.author}...')
+            self.logger.info(f'Updating Steam ID data for user: {ctx.author}...')
             cursor.execute(
                 """
                 UPDATE tb_users
@@ -67,5 +70,5 @@ class Steam(commands.Cog):
         self.connection.commit()
 
         await ctx.respond(f'Removing Steam ID for **{ctx.author}**.')
-        print(f'Removing Steam ID for {ctx.author}')
+        self.logger.info(f'Removing Steam ID for {ctx.author}')
 

@@ -12,8 +12,13 @@ import discord
 from cogs.Game import Game
 from cogs.Steam import Steam
 
+from src.logging.Logger import Logger
+
 # Defining constants.
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Initializing the logger.
+logger = Logger(os.path.join(ROOT_DIRECTORY, 'logs'))
 
 # Setting the bot intents and initializing the bot.
 intents = discord.Intents.default()
@@ -67,7 +72,7 @@ def get_steam_app_data() -> None:
     """
     response = requests.get('https://api.steampowered.com/ISteamApps/GetAppList/v0002')
     if response.status_code == 200:
-        print('Acquired application data from Steam!')
+        logger.info('Acquired application data from Steam!')
 
         # Converting the acquired JSON data to a Python dictionary.
         cursor = sql_connection.cursor()
@@ -81,16 +86,16 @@ def get_steam_app_data() -> None:
             )
 
         cursor.execute("SELECT COUNT(*) FROM tb_steam_games;")
-        print(f'Inserted {cursor.fetchone()[0]} game IDs into tb_steam_games...')
+        logger.info(f'Inserted {cursor.fetchone()[0]} game IDs into tb_steam_games...')
         cursor.close()
     else:
-        print('Could not acquire application data from Steam servers, aborting bot startup...')
+        logger.critical('Could not acquire application data from Steam servers, aborting bot startup...')
         quit()
 
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user} is now online!')
+    logger.info(f'{bot.user} is now online!')
 
 
 class GameSelectView(discord.ui.Select):
@@ -146,7 +151,7 @@ async def ping_command(ctx, game_title: str):
 
     # Finding the closest match to the passed game title.
     closest_matches = difflib.get_close_matches(game_title, game_title_list, 5)
-    print(f'{ctx.author} searched for "{game_title}", and got {len(closest_matches)} matches.')
+    logger.info(f'{ctx.author} searched for "{game_title}", and got {len(closest_matches)} matches.')
 
     # Validating that there are games in the closest_matches array.
     if len(closest_matches) == 0:
@@ -257,25 +262,25 @@ def get_discord_ids_for_game(game_title) -> list:
 
 
 if __name__ == '__main__':
-    # Creating the data directory, if it doesn't already exist.
-    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
-        os.makedirs('data')
-        print('Created data directory!')
-
     # Creating the logs directory, if it doesn't already exist.
     if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
         os.makedirs('logs')
-        print('Created logs directory!')
+        logger.info('Created logs directory!')
+
+    # Creating the data directory, if it doesn't already exist.
+    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
+        os.makedirs('data')
+        logger.info('Created data directory!')
 
     # Attempting to connect to the SQLite database.
     sql_connection = None
     try:
         sql_connection = sqlite3.connect(os.path.join(ROOT_DIRECTORY, 'data', 'database.sqlite'))
     except Error as error:
-        print('DATABASE ERROR: ' + str(error))
-        print('Aborting bot startup...')
+        logger.critical('DATABASE ERROR: ' + str(error))
+        logger.critical('Aborting bot startup...')
         quit()
-    print('Successfully created a connection to the database!')
+    logger.info('Successfully created a connection to the database!')
 
     # Initializing the SQLite database tables.
     create_database_tables()
@@ -288,8 +293,8 @@ if __name__ == '__main__':
     dotenv.load_dotenv()
 
     # Adding cogs to the bot.
-    bot.add_cog(Steam(bot, sql_connection))
-    bot.add_cog(Game(bot, sql_connection))
+    bot.add_cog(Steam(bot, sql_connection, logger))
+    bot.add_cog(Game(bot, sql_connection, logger))
 
     # Starting the bot.
     bot.run(os.getenv('DISCORD_TOKEN'))

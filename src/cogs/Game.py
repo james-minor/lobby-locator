@@ -4,14 +4,17 @@ import discord
 from discord import Bot
 from discord.ext import commands
 
+from src.logging.Logger import Logger
+
 
 class Game(commands.Cog):
 
     game = discord.SlashCommandGroup('game', 'Commands handling custom non-steam games')
 
-    def __init__(self, bot: Bot, sql_connection: Connection):
+    def __init__(self, bot: Bot, sql_connection: Connection, logger: Logger):
         self.bot = bot
         self.connection = sql_connection
+        self.logger = logger
 
     @game.command(name='add', description="Adds a custom game to the games database.")
     @commands.has_permissions(administrator=True)
@@ -41,10 +44,10 @@ class Game(commands.Cog):
             self.connection.commit()
 
             await ctx.respond(f'Added custom game **{game_title}**.')
-            print(f'{ctx.author} added custom game "{game_title}"...')
+            self.logger.info(f'{ctx.author} added custom game "{game_title}"...')
         else:
             await ctx.respond(f'Custom game **{game_title}** already exists!')
-            print(f'{ctx.author} attempted to add custom game "{game_title}", but game already existed...')
+            self.logger.info(f'{ctx.author} attempted to add custom game "{game_title}", but game already existed...')
 
     @game.command(name='remove', description="Removes a custom game from the games database.")
     @commands.has_permissions(administrator=True)
@@ -74,7 +77,7 @@ class Game(commands.Cog):
         self.connection.commit()
 
         await ctx.respond(f'Removed custom game **{game_title}**.')
-        print(f'{ctx.author} removed custom game "{game_title}"...')
+        self.logger.info(f'{ctx.author} removed custom game "{game_title}"...')
 
     @game.command(name="register", description="Registers a custom game as connected to your account.")
     async def register_user_command(self, ctx, game_title: str):
@@ -92,7 +95,7 @@ class Game(commands.Cog):
             await ctx.respond(
                 f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.'
             )
-            print(f'{ctx.author} tried to register non-added game "{game_title}"...')
+            self.logger.info(f'{ctx.author} tried to register non-added game "{game_title}"...')
             return
 
         # Validating that this game is NOT already registered to the current user.
@@ -116,7 +119,7 @@ class Game(commands.Cog):
             )
 
             await ctx.respond(f'Registered custom game **{game_title}** for **{ctx.author}**.')
-            print(f'Registered custom game {game_title} for {ctx.author}...')
+            self.logger.info(f'Registered custom game {game_title} for {ctx.author}...')
         else:
             await ctx.respond(f'Your account is already registered for **{game_title}**!')
 
@@ -158,10 +161,11 @@ class Game(commands.Cog):
         self.connection.commit()
 
         await ctx.respond(f'Unregistered **{game_title}** from your account.')
-        print(f'{ctx.author} unregistered "{game_title}" from their account...')
+        self.logger.info(f'{ctx.author} unregistered "{game_title}" from their account...')
 
     @game.command(name="list", description="Lists the game titles in the custom games library")
     async def list_custom_game_command(self, ctx):
+        self.logger.info(f'{ctx.author} requested the custom games list.')
         title_cursor = self.connection.cursor()
 
         # Validating that there are any custom games.
