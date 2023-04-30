@@ -264,12 +264,12 @@ def get_discord_ids_for_game(game_title) -> list:
 if __name__ == '__main__':
     # Creating the logs directory, if it doesn't already exist.
     if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
-        os.makedirs('logs')
+        os.makedirs(os.path.join(ROOT_DIRECTORY, 'logs'))
         logger.info('Created logs directory!')
 
     # Creating the data directory, if it doesn't already exist.
     if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
-        os.makedirs('data')
+        os.makedirs(os.path.join(ROOT_DIRECTORY, 'data'))
         logger.info('Created data directory!')
 
     # Attempting to connect to the SQLite database.
