@@ -4,7 +4,7 @@ import discord
 from discord import Bot
 from discord.ext import commands
 
-from src.logging.Logger import Logger
+from logging import Logger
 
 
 class Game(commands.Cog):
