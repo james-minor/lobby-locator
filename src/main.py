@@ -16,7 +16,7 @@ from cogs.Steam import Steam
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # Setting the bot intents and initializing the bot.
-intents = discord.Intents.all()  # TODO: enable proper intents, we dont need all of them (helps with development)
+intents = discord.Intents.default()
 bot = discord.Bot(intents=intents)
 
 
