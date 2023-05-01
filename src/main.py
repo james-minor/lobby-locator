@@ -34,7 +34,7 @@ def create_database_tables() -> None:
     cursor = sql_connection.cursor()
     cursor.executescript(
         """
-        CREATE TABLE IF NOT EXISTS tb_users (
+        CREATE TABLE IF NOT EXISTS tb_steam_users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             discord_id VARCHAR(18) NOT NULL,
             steam_id VARCHAR(17)
@@ -238,7 +238,7 @@ def get_discord_ids_for_game(game_title) -> list:
     user_cursor = sql_connection.cursor()
     user_cursor.execute(
         """
-        SELECT discord_id, steam_id FROM tb_users
+        SELECT discord_id, steam_id FROM tb_steam_users
         """
     )
     users = user_cursor.fetchall()

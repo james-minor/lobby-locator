@@ -24,7 +24,7 @@ class Steam(commands.Cog):
         cursor = self.connection.cursor()
         cursor.execute(
             """
-            SELECT COUNT(*) FROM tb_users
+            SELECT COUNT(*) FROM tb_steam_users
             WHERE discord_id = ?
             """,
             [ctx.author.id]
@@ -33,7 +33,7 @@ class Steam(commands.Cog):
             self.logger.info(f'Inserting Steam ID data for user: {ctx.author}...')
             cursor.execute(
                 """
-                INSERT INTO tb_users(discord_id, steam_id)
+                INSERT INTO tb_steam_users(discord_id, steam_id)
                 VALUES(?, ?);
                 """,
                 [str(ctx.author.id), str(steam_id)]
@@ -42,7 +42,7 @@ class Steam(commands.Cog):
             self.logger.info(f'Updating Steam ID data for user: {ctx.author}...')
             cursor.execute(
                 """
-                UPDATE tb_users
+                UPDATE tb_steam_users
                 SET steam_id = ?
                 WHERE discord_id = ?;
                 """,
@@ -56,10 +56,10 @@ class Steam(commands.Cog):
     async def remove_command(self, ctx):
         cursor = self.connection.cursor()
 
-        # Removing the user entry from tb_users.
+        # Removing the user entry from tb_steam_users.
         cursor.execute(
             """
-            DELETE FROM tb_users
+            DELETE FROM tb_steam_users
             WHERE discord_id = ?;
             """,
             [ctx.author.id]
