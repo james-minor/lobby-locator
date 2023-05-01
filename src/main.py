@@ -10,6 +10,8 @@ import sqlite3
 from sqlite3 import Error
 
 import discord
+from discord import LoginFailure
+
 from cogs.Game import Game
 from cogs.Steam import Steam
 
@@ -323,4 +325,11 @@ if __name__ == '__main__':
     bot.add_cog(Game(bot, sql_connection, logger))
 
     # Starting the bot.
-    bot.run(os.getenv('DISCORD_TOKEN'))
+    try:
+        bot.run(os.getenv('DISCORD_TOKEN'))
+    except LoginFailure as error:
+        logger.critical(f'Bot failed to login: "{error}".')
+        sys.exit('Discord bot failed to login')
+    except Error as error:
+        logger.critical(f'Discord bot threw an Error while starting: "{error}".')
+        sys.exit('Could not start Discord bot')
