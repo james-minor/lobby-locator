@@ -33,20 +33,20 @@ class Steam(commands.Cog):
             self.logger.info(f'Inserting Steam ID data for user: {ctx.author}...')
             cursor.execute(
                 """
-                INSERT INTO tb_users(discord_tag, discord_id, steam_id)
-                VALUES(?, ?, ?);
+                INSERT INTO tb_users(discord_id, steam_id)
+                VALUES(?, ?);
                 """,
-                [str(ctx.author), str(ctx.author.id), str(steam_id)]
+                [str(ctx.author.id), str(steam_id)]
             )
         else:
             self.logger.info(f'Updating Steam ID data for user: {ctx.author}...')
             cursor.execute(
                 """
                 UPDATE tb_users
-                SET discord_tag = ?, steam_id = ?
+                SET steam_id = ?
                 WHERE discord_id = ?;
                 """,
-                [str(ctx.author), str(steam_id), str(ctx.author.id)]
+                [str(steam_id), str(ctx.author.id)]
             )
 
         cursor.close()

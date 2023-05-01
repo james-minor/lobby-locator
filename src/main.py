@@ -36,7 +36,6 @@ def create_database_tables() -> None:
         """
         CREATE TABLE IF NOT EXISTS tb_users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            discord_tag VARCHAR(100) NOT NULL,
             discord_id VARCHAR(18) NOT NULL,
             steam_id VARCHAR(17)
         );
