@@ -25,6 +25,21 @@ intents = discord.Intents.default()
 bot = discord.Bot(intents=intents)
 
 
+def validate_environment_variables() -> bool:
+    environment_variables = [
+        'DISCORD_TOKEN',
+        'STEAM_API_KEY'
+    ]
+
+    file_valid = True
+    for variable in environment_variables:
+        if not os.getenv(variable):
+            logger.critical(f'Environment variable not found: "{variable}".')
+            file_valid = False
+
+    return file_valid
+
+
 def create_database_tables() -> None:
     """
     Initializes the SQL database tables if they have not been created already.
@@ -265,6 +280,15 @@ if __name__ == '__main__':
     if not dotenv.load_dotenv():
         logger.critical('No .env file found! Aborting bot startup...')
         quit()
+    else:
+        logger.info('Loaded .env file!')
+
+    # Validating all environment variables exist.
+    if not validate_environment_variables():
+        logger.critical('Not all environment variables present! Aborting bot startup...')
+        quit()
+    else:
+        logger.info('Environment variables validated!')
 
     # Creating the logs directory, if it doesn't already exist.
     if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
