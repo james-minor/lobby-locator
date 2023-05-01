@@ -261,6 +261,11 @@ def get_discord_ids_for_game(game_title) -> list:
 
 
 if __name__ == '__main__':
+    # Getting the API keys from the dotEnv file.
+    if not dotenv.load_dotenv():
+        logger.critical('No .env file found! Aborting bot startup...')
+        quit()
+
     # Creating the logs directory, if it doesn't already exist.
     if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
         os.makedirs(os.path.join(ROOT_DIRECTORY, 'logs'))
@@ -287,9 +292,6 @@ if __name__ == '__main__':
     # Gathering the Steam application data.
     get_steam_app_data()
     sql_connection.commit()
-
-    # Getting the API keys from the dotEnv file.
-    dotenv.load_dotenv()
 
     # Adding cogs to the bot.
     bot.add_cog(Steam(bot, sql_connection, logger))
