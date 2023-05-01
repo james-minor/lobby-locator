@@ -1,5 +1,6 @@
 import difflib
 import os
+import sys
 
 import dotenv
 import requests
@@ -104,7 +105,7 @@ def get_steam_app_data() -> None:
         cursor.close()
     else:
         logger.critical('Could not acquire application data from Steam servers, aborting bot startup...')
-        quit()
+        sys.exit('Could not acquire application data from Steam servers')
 
 
 @bot.event
@@ -279,14 +280,14 @@ if __name__ == '__main__':
     # Getting the API keys from the dotEnv file.
     if not dotenv.load_dotenv():
         logger.critical('No .env file found! Aborting bot startup...')
-        quit()
+        sys.exit('No .env file found')
     else:
         logger.info('Loaded .env file!')
 
     # Validating all environment variables exist.
     if not validate_environment_variables():
         logger.critical('Not all environment variables present! Aborting bot startup...')
-        quit()
+        sys.exit('Not all environment variables present')
     else:
         logger.info('Environment variables validated!')
 
@@ -307,7 +308,7 @@ if __name__ == '__main__':
     except Error as error:
         logger.critical('DATABASE ERROR: ' + str(error))
         logger.critical('Aborting bot startup...')
-        quit()
+        sys.exit('Internal database error')
     logger.info('Successfully created a connection to the database!')
 
     # Initializing the SQLite database tables.
