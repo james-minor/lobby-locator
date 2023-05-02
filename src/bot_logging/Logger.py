@@ -20,8 +20,8 @@ class Logger:
         self.log(LogLevel.CRITICAL, message)
 
     def log(self, log_level: LogLevel, message: str) -> None:
-        with open(os.path.join(self._log_directory, datetime.today().strftime('%d-%m-%Y') + '.log'), 'a') as file:
-            date_time_tag = f'[{datetime.today().strftime("%d-%m-%Y %H:%M:%S")}]'
+        with open(os.path.join(self._log_directory, datetime.today().strftime('%m-%d-%Y') + '.log'), 'a') as file:
+            date_time_tag = f'[{datetime.today().strftime("%m-%d-%Y %H:%M:%S")}]'
             file.write(date_time_tag + f'[{log_level.value[0]}]: {message}\n')
 
             if self.log_to_console:
