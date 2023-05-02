@@ -19,7 +19,11 @@ from bot_logging.Logger import Logger
 
 # Defining constants.
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-ENVIRONMENT_TYPE = os.environ['ENVIRONMENT_TYPE'] or 'DEVELOPMENT'
+try:
+    ENVIRONMENT_TYPE = os.environ['ENVIRONMENT_TYPE']
+except KeyError:
+    print('No ENVIRONMENT_TYPE environment variable present, setting bot to DEVELOPMENT mode.')
+    ENVIRONMENT_TYPE = 'DEVELOPMENT'
 
 # Initializing the logger.
 if ENVIRONMENT_TYPE == 'PRODUCTION':
