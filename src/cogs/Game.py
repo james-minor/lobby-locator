@@ -33,10 +33,10 @@ class Game(commands.Cog):
         if cursor.fetchone()[0] == 0:
             cursor.execute(
                 """
-                INSERT INTO  tb_custom_games(game_title)
-                VALUES(?);
+                INSERT INTO tb_custom_games(game_title, game_title_lowercase)
+                VALUES(?, ?);
                 """,
-                [game_title]
+                [game_title, game_title.lower()]
             )
 
             # Committing action to the database.

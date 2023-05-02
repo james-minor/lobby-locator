@@ -70,13 +70,14 @@ def create_database_tables() -> None:
         CREATE TABLE IF NOT EXISTS tb_steam_games(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             steam_id VARCHAR(10),
-            game_title VARCHAR(100)
+            game_title VARCHAR(100),
+            game_title_lowercase VARCHAR(100)
         );
 
         CREATE TABLE IF NOT EXISTS tb_custom_games(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            game_title VARCHAR(100),
-            UNIQUE(game_title)
+            game_title VARCHAR(100) UNIQUE,
+            game_title_lowercase VARCHAR(100) UNIQUE
         );
 
         CREATE TABLE IF NOT EXISTS tb_owned_custom_games(
@@ -102,12 +103,15 @@ def get_steam_app_data() -> None:
         # Converting the acquired JSON data to a Python dictionary.
         cursor = sql_connection.cursor()
         for app in json.loads(response.content)['applist']['apps']:
+            if app['name'] == '':
+                continue
+
             cursor.execute(
                 """
-                INSERT INTO tb_steam_games(steam_id, game_title)
-                VALUES(?, ?);
+                INSERT INTO tb_steam_games(steam_id, game_title, game_title_lowercase)
+                VALUES(?, ?, ?);
                 """,
-                [app['appid'], app['name']]
+                [app['appid'], app['name'], app['name'].lower()]
             )
 
         cursor.execute("SELECT COUNT(*) FROM tb_steam_games;")
@@ -166,16 +170,16 @@ async def ping_command(ctx, game_title: str):
     game_title_cursor.row_factory = lambda cursor, row: row[0]
     game_title_cursor.execute(
         """
-        SELECT game_title FROM tb_steam_games
+        SELECT game_title_lowercase FROM tb_steam_games
         UNION ALL
-        SELECT game_title FROM tb_custom_games;
+        SELECT game_title_lowercase FROM tb_custom_games;
         """
     )
-    game_title_list = game_title_cursor.fetchall()
+    lowercase_game_title_list = game_title_cursor.fetchall()
     game_title_cursor.close()
 
     # Finding the closest match to the passed game title.
-    closest_matches = difflib.get_close_matches(game_title, game_title_list, 5)
+    closest_matches = difflib.get_close_matches(game_title.lower(), lowercase_game_title_list, 5)
     logger.info(f'{ctx.author} searched for "{game_title}", and got {len(closest_matches)} matches.')
 
     # Validating that there are games in the closest_matches array.
@@ -184,15 +188,19 @@ async def ping_command(ctx, game_title: str):
         return
 
     # If there is an exact match for the game title, ping all users who own that game.
-    if game_title in closest_matches:
-        discord_ids = get_discord_ids_for_game(game_title)
+    if game_title.lower() in closest_matches:
+        # Fetching the actual game title from the database.
+        actual_game_title = get_actual_game_title(game_title.lower())
+
+        # Getting the Discord IDs for players who own the actual game title.
+        discord_ids = get_discord_ids_for_game(actual_game_title)
 
         # Checking to see if anyone besides the context author owns the game.
         if len(discord_ids) == 0:
-            await ctx.respond(f'Uh oh! It looks like nobody owns **{game_title}**.')
+            await ctx.respond(f'Uh oh! It looks like nobody owns **{actual_game_title}**.')
             return
         elif len(discord_ids) == 1 and discord_ids[0] == str(ctx.author.id):
-            await ctx.respond(f'It looks like you are the only person who owns **{game_title}**.')
+            await ctx.respond(f'It looks like you are the only person who owns **{actual_game_title}**.')
             return
 
         # Generating a string of user pings to append to the  message.
@@ -200,13 +208,18 @@ async def ping_command(ctx, game_title: str):
         for discord_id in discord_ids:
             if discord_id != str(ctx.author.id):
                 ping_string += f'<@{str(discord_id)}> '
-        await ctx.respond(f'**{ctx.author}** is looking to play **{game_title}** ' + ping_string)
+        await ctx.respond(f'**{ctx.author}** is looking to play **{actual_game_title}** ' + ping_string)
 
         return
 
+    # Getting a list of actual game titles.
+    closest_matches_actual_titles = list()
+    for title in closest_matches:
+        closest_matches_actual_titles.append(get_actual_game_title(title))
+
     # Creating a new GameSelectView if the game title did not have an exact match.
     select_menu = discord.ui.View(timeout=10)
-    select_menu.add_item(GameSelectView(closest_matches))
+    select_menu.add_item(GameSelectView(closest_matches_actual_titles))
 
     await ctx.respond('Please select a game to find players for:', view=select_menu)
 
@@ -284,6 +297,32 @@ def get_discord_ids_for_game(game_title) -> list:
     steam_cursor.close()
     user_cursor.close()
     return output
+
+
+def get_actual_game_title(lowercase_game_title: str) -> str:
+    """
+    Gets the actual game title from a lowercase version of the game title.
+
+    :param lowercase_game_title: The lowercase version of the game title.
+    :return: The actual game title within the database.
+    """
+
+    cursor = sql_connection.cursor()
+    cursor.execute(
+        """
+        SELECT game_title FROM tb_steam_games
+            WHERE game_title_lowercase = ?
+        UNION ALL
+        SELECT game_title FROM tb_custom_games
+            WHERE game_title_lowercase = ?;
+        """,
+        [lowercase_game_title, lowercase_game_title]
+    )
+    actual_game_title = cursor.fetchone()[0]
+    cursor.close()
+
+    return actual_game_title
+
 
 
 if __name__ == '__main__':
