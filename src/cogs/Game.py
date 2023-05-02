@@ -54,6 +54,20 @@ class Game(commands.Cog):
     async def remove_game_command(self, ctx, game_title: str):
         cursor = self.connection.cursor()
 
+        # Seeing if the requested game exists.
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM tb_games
+            WHERE game_title = ?
+                AND steam_id IS NULL;
+            """,
+            [game_title]
+        )
+        if cursor.fetchone()[0] != 1:
+            await ctx.respond(f'Custom game **{game_title}** does not exist!')
+            self.logger.info(f'{ctx.author} attempted to remove non-existent custom game "{game_title}"...')
+            return
+
         # Removing any entries from tb_owned_games table.
         cursor.execute(
             """
