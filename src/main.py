@@ -51,7 +51,7 @@ def validate_environment_variables() -> bool:
     return file_valid
 
 
-def create_database_tables() -> None:
+def initialize_database_tables() -> None:
     """
     Initializes the SQL database tables if they have not been created already.
     :return: None
@@ -65,22 +65,18 @@ def create_database_tables() -> None:
             discord_id VARCHAR(18) NOT NULL,
             steam_id VARCHAR(17)
         );
-
-        DROP TABLE IF EXISTS tb_steam_games;
-        CREATE TABLE IF NOT EXISTS tb_steam_games(
+        
+        CREATE TABLE IF NOT EXISTS tb_games(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             steam_id VARCHAR(10),
-            game_title VARCHAR(100),
-            game_title_lowercase VARCHAR(100)
+            game_title VARCHAR(100) NOT NULL,
+            game_title_lower VARCHAR(100) NOT NULL
         );
+        
+        DELETE FROM tb_games
+            WHERE steam_id IS NOT NULL;
 
-        CREATE TABLE IF NOT EXISTS tb_custom_games(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            game_title VARCHAR(100) UNIQUE,
-            game_title_lowercase VARCHAR(100) UNIQUE
-        );
-
-        CREATE TABLE IF NOT EXISTS tb_owned_custom_games(
+        CREATE TABLE IF NOT EXISTS tb_owned_games(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_title VARCHAR(100) NOT NULL,
             discord_id VARCHAR(18) NOT NULL,
@@ -102,21 +98,22 @@ def get_steam_app_data() -> None:
 
         # Converting the acquired JSON data to a Python dictionary.
         cursor = sql_connection.cursor()
+        game_count = 0
         for app in json.loads(response.content)['applist']['apps']:
             if app['name'] == '':
                 continue
 
             cursor.execute(
                 """
-                INSERT INTO tb_steam_games(steam_id, game_title, game_title_lowercase)
+                INSERT INTO tb_games(steam_id, game_title, game_title_lower)
                 VALUES(?, ?, ?);
                 """,
                 [app['appid'], app['name'], app['name'].lower()]
             )
+            game_count += 1
 
-        cursor.execute("SELECT COUNT(*) FROM tb_steam_games;")
-        logger.info(f'Inserted {cursor.fetchone()[0]} game IDs into tb_steam_games...')
         cursor.close()
+        logger.info(f'Inserted {game_count} game IDs into tb_steam_games...')
     else:
         logger.critical('Could not acquire application data from Steam servers, aborting bot startup...')
         sys.exit('Could not acquire application data from Steam servers')
@@ -170,9 +167,7 @@ async def ping_command(ctx, game_title: str):
     game_title_cursor.row_factory = lambda cursor, row: row[0]
     game_title_cursor.execute(
         """
-        SELECT game_title_lowercase FROM tb_steam_games
-        UNION ALL
-        SELECT game_title_lowercase FROM tb_custom_games;
+        SELECT game_title_lower FROM tb_games
         """
     )
     lowercase_game_title_list = game_title_cursor.fetchall()
@@ -236,8 +231,9 @@ def get_discord_ids_for_game(game_title) -> list:
     # Seeing if the game is a custom game.
     type_cursor.execute(
         """
-        SELECT COUNT(*) FROM tb_custom_games
+        SELECT COUNT(*) FROM tb_games
         WHERE game_title = ?
+            AND steam_id IS NULL;
         """,
         [game_title]
     )
@@ -248,8 +244,8 @@ def get_discord_ids_for_game(game_title) -> list:
         game_cursor.row_factory = lambda cursor, row: row[0]
         game_cursor.execute(
             """
-            SELECT discord_id FROM tb_owned_custom_games
-            WHERE game_title = ?
+            SELECT discord_id FROM tb_owned_games
+            WHERE game_title = ?;
             """,
             [game_title]
         )
@@ -266,7 +262,7 @@ def get_discord_ids_for_game(game_title) -> list:
     steam_cursor = sql_connection.cursor()
     steam_cursor.execute(
         """
-        SELECT steam_id FROM tb_steam_games
+        SELECT steam_id FROM tb_games
         WHERE game_title = ?;
         """,
         [game_title]
@@ -277,7 +273,7 @@ def get_discord_ids_for_game(game_title) -> list:
     user_cursor = sql_connection.cursor()
     user_cursor.execute(
         """
-        SELECT discord_id, steam_id FROM tb_steam_users
+        SELECT discord_id, steam_id FROM tb_steam_users;
         """
     )
     users = user_cursor.fetchall()
@@ -310,13 +306,10 @@ def get_actual_game_title(lowercase_game_title: str) -> str:
     cursor = sql_connection.cursor()
     cursor.execute(
         """
-        SELECT game_title FROM tb_steam_games
-            WHERE game_title_lowercase = ?
-        UNION ALL
-        SELECT game_title FROM tb_custom_games
-            WHERE game_title_lowercase = ?;
+        SELECT game_title FROM tb_games
+            WHERE game_title_lower = ?;
         """,
-        [lowercase_game_title, lowercase_game_title]
+        [lowercase_game_title]
     )
     actual_game_title = cursor.fetchone()[0]
     cursor.close()
@@ -367,7 +360,7 @@ if __name__ == '__main__':
     logger.info('Successfully created a connection to the database!')
 
     # Initializing the SQLite database tables.
-    create_database_tables()
+    initialize_database_tables()
 
     # Gathering the Steam application data.
     get_steam_app_data()

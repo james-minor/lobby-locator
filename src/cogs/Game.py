@@ -23,7 +23,7 @@ class Game(commands.Cog):
         cursor = self.connection.cursor()
         cursor.execute(
             """
-            SELECT COUNT(*) FROM tb_custom_games
+            SELECT COUNT(*) FROM tb_games
             WHERE game_title = ?;
             """,
             [game_title]
@@ -33,7 +33,7 @@ class Game(commands.Cog):
         if cursor.fetchone()[0] == 0:
             cursor.execute(
                 """
-                INSERT INTO tb_custom_games(game_title, game_title_lowercase)
+                INSERT INTO tb_games(game_title, game_title_lower)
                 VALUES(?, ?);
                 """,
                 [game_title, game_title.lower()]
@@ -54,20 +54,21 @@ class Game(commands.Cog):
     async def remove_game_command(self, ctx, game_title: str):
         cursor = self.connection.cursor()
 
-        # Removing any entries from tb_owned_custom_games table.
+        # Removing any entries from tb_owned_games table.
         cursor.execute(
             """
-            DELETE FROM tb_owned_custom_games
+            DELETE FROM tb_owned_games
             WHERE game_title = ?;
             """,
             [game_title]
         )
 
-        # Removing the custom game entry from the tb_custom_games table.
+        # Removing the custom game entry from the tb_games table.
         cursor.execute(
             """
-            DELETE FROM tb_custom_games
-            WHERE game_title = ?;
+            DELETE FROM tb_games
+            WHERE game_title = ?
+                AND steam_id IS NULL;
             """,
             [game_title]
         )
@@ -86,8 +87,9 @@ class Game(commands.Cog):
         # Validating that the custom game exists in tb_custom_games.
         cursor.execute(
             """
-            SELECT COUNT(*) FROM tb_custom_games
-            WHERE game_title = ?;
+            SELECT COUNT(*) FROM tb_games
+            WHERE game_title = ?
+                AND steam_id IS NULL;
             """,
             [game_title]
         )
@@ -101,7 +103,7 @@ class Game(commands.Cog):
         # Validating that this game is NOT already registered to the current user.
         cursor.execute(
             """
-            SELECT COUNT(*) FROM tb_owned_custom_games
+            SELECT COUNT(*) FROM tb_owned_games
             WHERE game_title = ?
                 AND discord_id = ?;
             """,
@@ -112,7 +114,7 @@ class Game(commands.Cog):
         if cursor.fetchone()[0] == 0:
             cursor.execute(
                 """
-                INSERT INTO tb_owned_custom_games(game_title, discord_id)
+                INSERT INTO tb_owned_games(game_title, discord_id)
                 VALUES(?, ?)
                 """,
                 [game_title, ctx.author.id]
@@ -134,8 +136,9 @@ class Game(commands.Cog):
         # Checking to see if the requested custom game title exists.
         cursor.execute(
             """
-            SELECT COUNT(*) FROM tb_custom_games
-            WHERE game_title = ?;
+            SELECT COUNT(*) FROM tb_games
+            WHERE game_title = ?
+                AND steam_id IS NULL;
             """,
             [game_title]
         )
@@ -149,7 +152,7 @@ class Game(commands.Cog):
         # If the custom game exists, deleting the user's custom game entry.
         cursor.execute(
             """
-            DELETE FROM tb_owned_custom_games
+            DELETE FROM tb_owned_games
             WHERE game_title = ?
                 AND discord_id = ?;
             """,
@@ -169,7 +172,7 @@ class Game(commands.Cog):
         title_cursor = self.connection.cursor()
 
         # Validating that there are any custom games.
-        title_cursor.execute('SELECT COUNT(*) FROM tb_custom_games')
+        title_cursor.execute('SELECT COUNT(*) FROM tb_games WHERE steam_id IS NULL')
         if title_cursor.fetchone()[0] == 0:
             title_cursor.close()
             await ctx.respond('There are no custom games, please contact an admin to add to the custom game library.')
@@ -177,7 +180,7 @@ class Game(commands.Cog):
 
         # Fetching all the game titles from tb_custom_games.
         title_cursor.row_factory = lambda cursor, row: row[0]
-        title_cursor.execute('SELECT game_title FROM tb_custom_games;')
+        title_cursor.execute('SELECT game_title FROM tb_games WHERE steam_id IS NULL;')
 
         # Creating a string list of every custom game title.
         output_string = '```' + '\n' + 'Custom Game Library Titles:\n'
