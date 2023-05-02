@@ -19,9 +19,13 @@ from bot_logging.Logger import Logger
 
 # Defining constants.
 ROOT_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+ENVIRONMENT_TYPE = os.environ['ENVIRONMENT_TYPE'] or 'DEVELOPMENT'
 
 # Initializing the logger.
-logger = Logger(os.path.join(ROOT_DIRECTORY, 'logs'))
+if ENVIRONMENT_TYPE == 'PRODUCTION':
+    logger = Logger(os.path.join(ROOT_DIRECTORY, 'logs'), False)
+else:
+    logger = Logger(os.path.join(ROOT_DIRECTORY, 'logs'))
 
 # Setting the bot intents and initializing the bot.
 intents = discord.Intents.default()
@@ -279,8 +283,25 @@ def get_discord_ids_for_game(game_title) -> list:
 
 
 if __name__ == '__main__':
+    # Creating the logs directory, if it doesn't already exist.
+    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
+        os.makedirs(os.path.join(ROOT_DIRECTORY, 'logs'))
+        logger.info('Created logs directory!')
+
+    # Creating the data directory, if it doesn't already exist.
+    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
+        os.makedirs(os.path.join(ROOT_DIRECTORY, 'data'))
+        logger.info('Created data directory!')
+
     # Getting the API keys from the dotEnv file.
-    if not dotenv.load_dotenv():
+    if ENVIRONMENT_TYPE == 'PRODUCTION':
+        environment_file_path = os.path.join(ROOT_DIRECTORY, '.env.production')
+        logger.info('Attempting to load production .env file...')
+    else:
+        environment_file_path = os.path.join(ROOT_DIRECTORY, '.env.development')
+        logger.info('Attempting to load development .env file...')
+
+    if not dotenv.load_dotenv(environment_file_path):
         logger.critical('No .env file found! Aborting bot startup...')
         sys.exit('No .env file found')
     else:
@@ -292,16 +313,6 @@ if __name__ == '__main__':
         sys.exit('Not all environment variables present')
     else:
         logger.info('Environment variables validated!')
-
-    # Creating the logs directory, if it doesn't already exist.
-    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'logs')):
-        os.makedirs(os.path.join(ROOT_DIRECTORY, 'logs'))
-        logger.info('Created logs directory!')
-
-    # Creating the data directory, if it doesn't already exist.
-    if not os.path.exists(os.path.join(ROOT_DIRECTORY, 'data')):
-        os.makedirs(os.path.join(ROOT_DIRECTORY, 'data'))
-        logger.info('Created data directory!')
 
     # Attempting to connect to the SQLite database.
     sql_connection = None
