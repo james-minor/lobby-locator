@@ -30,5 +30,7 @@ pip3 freeze > requirements.txt
 ### Gathering API Tokens
 
 For Security reasons, API tokens and keys should obviously **never** be shared in any repository. It is for that reason
-that we store any tokens in ```.env``` file, the schema for the ```.env``` file can be found in the ```.env.example``` 
+that we store any tokens in ```.env``` files, the schema for the ```.env``` files can be found in the ```.env.example``` 
 file.
+
+Place any production keys within the ```.env.production``` file, and any development keys within ```.env.development```.
