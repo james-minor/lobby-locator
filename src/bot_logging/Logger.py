@@ -22,7 +22,7 @@ class Logger:
     def log(self, log_level: LogLevel, message: str) -> None:
         with open(os.path.join(self._log_directory, datetime.today().strftime('%d-%m-%Y') + '.log'), 'a') as file:
             date_time_tag = f'[{datetime.today().strftime("%d-%m-%Y %H:%M:%S")}]'
-            file.write(date_time_tag + f'[{log_level}]: {message}\n')
+            file.write(date_time_tag + f'[{log_level.value[0]}]: {message}\n')
 
             if self.log_to_console:
-                print(date_time_tag + f'[{log_level}]: {message}')
+                print(date_time_tag + f'[{log_level.value[0]}]: {message}')
