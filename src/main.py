@@ -193,10 +193,10 @@ async def ping_command(ctx, game_title: str):
 
         # Checking to see if anyone besides the context author owns the game.
         if len(discord_ids) == 0:
-            await ctx.respond(f'Uh oh! It looks like nobody owns **{actual_game_title}**.')
+            await ctx.respond(f'Uh oh! It looks like nobody owns **{actual_game_title}**.', ephemeral=True)
             return
         elif len(discord_ids) == 1 and discord_ids[0] == str(ctx.author.id):
-            await ctx.respond(f'It looks like you are the only person who owns **{actual_game_title}**.')
+            await ctx.respond(f'It looks like you are the only person who owns **{actual_game_title}**.', ephemeral=True)
             return
 
         # Generating a string of user pings to append to the  message.
