@@ -128,7 +128,8 @@ class GameSelectView(discord.ui.Select):
 
     options = list()
 
-    def __init__(self, game_titles: list):
+    def __init__(self, context, game_titles: list):
+        self.context = context
         self.options = list()
         for title in game_titles:
             self.options.append(discord.SelectOption(label=str(title)))
@@ -145,10 +146,10 @@ class GameSelectView(discord.ui.Select):
 
         # Checking to see if anyone besides the context author owns the game.
         if len(discord_ids) == 0:
-            await interaction.response.send_message(f'Uh oh! It looks like nobody owns **{self.values[0]}**.')
+            await interaction.response.send_message(f'Uh oh! It looks like nobody owns **{self.values[0]}**.', ephemeral=True)
             return
         elif len(discord_ids) == 1 and discord_ids[0] == str(interaction.user.id):
-            await interaction.response.send_message(f'You are the only person who owns **{self.values[0]}**.')
+            await interaction.response.send_message(f'You are the only person who owns **{self.values[0]}**.', ephemeral=True)
             return
 
         # Generating a string of user pings to append to the  message.
@@ -214,9 +215,9 @@ async def ping_command(ctx, game_title: str):
 
     # Creating a new GameSelectView if the game title did not have an exact match.
     select_menu = discord.ui.View(timeout=10)
-    select_menu.add_item(GameSelectView(closest_matches_actual_titles))
+    select_menu.add_item(GameSelectView(ctx, closest_matches_actual_titles))
 
-    await ctx.respond('Please select a game to find players for:', view=select_menu)
+    await ctx.respond('Please select a game to find players for:', view=select_menu, ephemeral=True)
 
 
 def get_discord_ids_for_game(game_title) -> list:
