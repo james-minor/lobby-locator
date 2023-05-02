@@ -46,7 +46,7 @@ class Game(commands.Cog):
             await ctx.respond(f'Added custom game **{game_title}**.')
             self.logger.info(f'{ctx.author} added custom game "{game_title}"...')
         else:
-            await ctx.respond(f'Custom game **{game_title}** already exists!')
+            await ctx.respond(f'Custom game **{game_title}** already exists!', ephemeral=True)
             self.logger.info(f'{ctx.author} attempted to add custom game "{game_title}", but game already existed...')
 
     @game.command(name='remove', description="Removes a custom game from the games database.")
@@ -64,7 +64,7 @@ class Game(commands.Cog):
             [game_title]
         )
         if cursor.fetchone()[0] != 1:
-            await ctx.respond(f'Custom game **{game_title}** does not exist!')
+            await ctx.respond(f'Custom game **{game_title}** does not exist!', ephemeral=True)
             self.logger.info(f'{ctx.author} attempted to remove non-existent custom game "{game_title}"...')
             return
 
@@ -109,7 +109,8 @@ class Game(commands.Cog):
         )
         if cursor.fetchone()[0] == 0:
             await ctx.respond(
-                f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.'
+                f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.',
+                ephemeral=True
             )
             self.logger.info(f'{ctx.author} tried to register non-added game "{game_title}"...')
             return
@@ -159,7 +160,8 @@ class Game(commands.Cog):
         if cursor.fetchone()[0] == 0:
             cursor.close()
             await ctx.respond(
-                f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.'
+                f'**{game_title}** is not a recognized title, contact an admin to add it to the custom game library.',
+                ephemeral=True
             )
             return
 
@@ -177,7 +179,7 @@ class Game(commands.Cog):
         cursor.close()
         self.connection.commit()
 
-        await ctx.respond(f'Unregistered **{game_title}** from your account.')
+        await ctx.respond(f'Unregistered **{game_title}** from your account.', ephemeral=True)
         self.logger.info(f'{ctx.author} unregistered "{game_title}" from their account...')
 
     @game.command(name="list", description="Lists the game titles in the custom games library")
@@ -189,7 +191,10 @@ class Game(commands.Cog):
         title_cursor.execute('SELECT COUNT(*) FROM tb_games WHERE steam_id IS NULL')
         if title_cursor.fetchone()[0] == 0:
             title_cursor.close()
-            await ctx.respond('There are no custom games, please contact an admin to add to the custom game library.')
+            await ctx.respond(
+                'There are no custom games, please contact an admin to add to the custom game library.',
+                ephemeral=True
+            )
             return
 
         # Fetching all the game titles from tb_custom_games.
@@ -203,4 +208,4 @@ class Game(commands.Cog):
         output_string += '```'
 
         title_cursor.close()
-        await ctx.respond(output_string)
+        await ctx.respond(output_string, ephemeral=True)

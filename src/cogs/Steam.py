@@ -18,7 +18,7 @@ class Steam(commands.Cog):
 
     @steam.command(name='set', description='Sets your saved Steam ID')
     async def set_command(self, ctx, steam_id: str):
-        await ctx.respond(f'Setting Steam ID: **{steam_id}**, for user: **{ctx.author}**')
+        await ctx.respond(f'Setting Steam ID: **{steam_id}**, for user: **{ctx.author}**', ephemeral=True)
 
         # Seeing if an entry for this user already exists, if so UPDATE instead of INSERTING data.
         cursor = self.connection.cursor()
@@ -69,6 +69,6 @@ class Steam(commands.Cog):
         cursor.close()
         self.connection.commit()
 
-        await ctx.respond(f'Removing Steam ID for **{ctx.author}**.')
+        await ctx.respond(f'Removing Steam ID for **{ctx.author}**.', ephemeral=True)
         self.logger.info(f'Removing Steam ID for {ctx.author}')
 
