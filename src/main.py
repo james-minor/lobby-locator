@@ -180,7 +180,7 @@ async def ping_command(ctx, game_title: str):
 
     # Validating that there are games in the closest_matches array.
     if len(closest_matches) == 0:
-        await ctx.respond(f'Sorry, I could not find any games matching **{game_title}**.')
+        await ctx.respond(f'Sorry, I could not find any games matching **{game_title}**.', ephemeral=True)
         return
 
     # If there is an exact match for the game title, ping all users who own that game.
