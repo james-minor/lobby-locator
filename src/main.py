@@ -134,15 +134,28 @@ async def on_ready():
 
 
 class GameSelectView(discord.ui.Select):
+    """
+    Select Menu view to ask the user what game title they want to ping for.
+    """
 
     options = list()
+    """
+    The options presented in the SelectMenu view.
+    """
 
-    def __init__(self, context, game_titles: list):
-        self.context = context
+    def __init__(self, game_titles: list):
+        """
+        Constructor for the GameSelectView class.
+
+        :param game_titles: List of game titles to display in the select menu.
+        """
+
+        # Appending passed options to the SelectMenu.
         self.options = list()
         for title in game_titles:
             self.options.append(discord.SelectOption(label=str(title)))
 
+        # Initializing the parent class.
         super().__init__(
             placeholder='Choose a game title!',
             min_values=1,
@@ -150,15 +163,26 @@ class GameSelectView(discord.ui.Select):
             options=self.options
         )
 
-    async def callback(self, interaction):
-        discord_ids = get_discord_ids_for_game(self.values[0])
+    async def callback(self, interaction) -> None:
+        """
+        Callback is called when the user selects a game title from the select menu.
+
+        :param interaction: The interaction context.
+        :return: None
+        """
+
+        # The select game title from the dropdown.
+        title = self.values[0]
+
+        # Getting a list of Discord IDs who own the selected title.
+        discord_ids = get_discord_ids_for_game(title)
 
         # Checking to see if anyone besides the context author owns the game.
         if len(discord_ids) == 0:
-            await interaction.response.send_message(f'Uh oh! It looks like nobody owns **{self.values[0]}**.', ephemeral=True)
+            await interaction.response.send_message(f'Uh oh! It looks like nobody owns **{title}**.', ephemeral=True)
             return
         elif len(discord_ids) == 1 and discord_ids[0] == str(interaction.user.id):
-            await interaction.response.send_message(f'You are the only person who owns **{self.values[0]}**.', ephemeral=True)
+            await interaction.response.send_message(f'You are the only person who owns **{title}**.', ephemeral=True)
             return
 
         # Generating a string of user pings to append to the  message.
@@ -166,7 +190,8 @@ class GameSelectView(discord.ui.Select):
         for discord_id in discord_ids:
             if discord_id != str(interaction.user.id):
                 ping_string += f'<@{str(discord_id)}> '
-        await interaction.response.send_message(f'**{interaction.user}** is looking to play **{self.values[0]}** ' + ping_string)
+
+        await interaction.response.send_message(f'**{interaction.user}** is looking to play **{title}** ' + ping_string)
 
 
 @bot.slash_command(name='ping', description='Pings any users who own the specified game title')
