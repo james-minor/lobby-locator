@@ -8,17 +8,37 @@ from logging import Logger
 
 
 class Game(commands.Cog):
+    """
+    The Game class contains definitions for any commands using the 'game' prefix.
+    """
 
     game = discord.SlashCommandGroup('game', 'Commands handling custom non-steam games')
 
     def __init__(self, bot: Bot, sql_connection: Connection, logger: Logger):
+        """
+        Constructor for the Game class.
+
+        :param bot: The Discord bot object.
+        :param sql_connection: The current database connection.
+        :param logger: The logging object.
+        """
         self.bot = bot
         self.connection = sql_connection
         self.logger = logger
 
     @game.command(name='add', description="Adds a custom game to the games database.")
     @commands.has_permissions(administrator=True)
-    async def add_game_command(self, ctx, game_title: str):
+    async def add_game_command(self, ctx, game_title: str) -> None:
+        """
+        Will add a custom game to the database, usable only by Administrators.
+
+        Example: **/game add Overwatch 2**
+
+        :param ctx: The command context.
+        :param game_title: The title of the game to add to the database.
+        :return: None
+        """
+
         # Seeing if an entry for this game already exists.
         cursor = self.connection.cursor()
         cursor.execute(
@@ -51,7 +71,17 @@ class Game(commands.Cog):
 
     @game.command(name='remove', description="Removes a custom game from the games database.")
     @commands.has_permissions(administrator=True)
-    async def remove_game_command(self, ctx, game_title: str):
+    async def remove_game_command(self, ctx, game_title: str) -> None:
+        """
+        Will remove a custom game from the database, usable only by Administrators.
+
+        Example: **/game remove Overwatch 2**
+
+        :param ctx: The command context.
+        :param game_title: The title of the game to remove from the database.
+        :return: None
+        """
+
         cursor = self.connection.cursor()
 
         # Seeing if the requested game exists.
@@ -95,7 +125,15 @@ class Game(commands.Cog):
         self.logger.info(f'{ctx.author} removed custom game "{game_title}"...')
 
     @game.command(name="register", description="Registers a custom game as connected to your account.")
-    async def register_user_command(self, ctx, game_title: str):
+    async def register_user_command(self, ctx, game_title: str) -> None:
+        """
+        Will register a custom game as being 'owned' by the current user.
+
+        :param ctx: The command context.
+        :param game_title: The title of the game to register.
+        :return: None
+        """
+
         cursor = self.connection.cursor()
 
         # Validating that the custom game exists in tb_custom_games.
@@ -145,7 +183,15 @@ class Game(commands.Cog):
         self.connection.commit()
 
     @game.command(name="unregister", description="Unregisters a custom game as connected to your account.")
-    async def unregister_custom_game_command(self, ctx, game_title: str):
+    async def unregister_custom_game_command(self, ctx, game_title: str) -> None:
+        """
+        Will unregister a custom game as being 'owned' by the current user.
+
+        :param ctx: The command context.
+        :param game_title: The game title to unregister.
+        :return: None
+        """
+
         cursor = self.connection.cursor()
 
         # Checking to see if the requested custom game title exists.
@@ -183,7 +229,14 @@ class Game(commands.Cog):
         self.logger.info(f'{ctx.author} unregistered "{game_title}" from their account...')
 
     @game.command(name="list", description="Lists the game titles in the custom games library")
-    async def list_custom_game_command(self, ctx):
+    async def list_custom_game_command(self, ctx) -> None:
+        """
+        Lists all the added custom game titles to the current user.
+
+        :param ctx: The command context.
+        :return: None
+        """
+
         self.logger.info(f'{ctx.author} requested the custom games list.')
         title_cursor = self.connection.cursor()
 
