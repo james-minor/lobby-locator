@@ -37,11 +37,19 @@ bot = discord.Bot(intents=intents)
 
 
 def validate_environment_variables() -> bool:
+    """
+    Validates that all the environment variables are present in the current dotEnv file.
+
+    :return: **True** if all the environment variables are present, otherwise returns **False**.
+    """
+
+    # List of required environment variables.
     environment_variables = [
         'DISCORD_TOKEN',
         'STEAM_API_KEY'
     ]
 
+    # Validating the current dotEnv file.
     file_valid = True
     for variable in environment_variables:
         if not os.getenv(variable):
@@ -92,6 +100,7 @@ def get_steam_app_data() -> None:
     Gathers the name and App ID of every application on Steam.
     :return: None
     """
+
     response = requests.get('https://api.steampowered.com/ISteamApps/GetAppList/v0002')
     if response.status_code == 200:
         logger.info('Acquired application data from Steam!')
@@ -161,7 +170,18 @@ class GameSelectView(discord.ui.Select):
 
 
 @bot.slash_command(name='ping', description='Pings any users who own the specified game title')
-async def ping_command(ctx, game_title: str):
+async def ping_command(ctx, game_title: str) -> None:
+    """
+    Used to ping users who own a specific game title. If the passed game title is not a match for a game in the database
+    will try to find close matches to the passed game_title.
+
+    Example: **/ping Counter-Strike: Global Offensive**
+
+    :param ctx: The command context.
+    :param game_title: The game title to ping users for.
+    :return: None
+    """
+
     game_title_cursor = sql_connection.cursor()
 
     # Getting a list of every registered game name (both from steam and custom games).
