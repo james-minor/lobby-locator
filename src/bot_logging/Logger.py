@@ -28,7 +28,7 @@ class Logger:
         """
 
         self._log_directory = log_directory
-        self.log_to_console = log_to_console
+        self._log_to_console = log_to_console
 
     def info(self, message: str) -> None:
         """
@@ -69,5 +69,5 @@ class Logger:
             date_time_tag = f'[{datetime.today().strftime("%m-%d-%Y %H:%M:%S")}]'
             file.write(date_time_tag + f'[{log_level.value[0]}]: {message}\n')
 
-            if self.log_to_console:
+            if self._log_to_console:
                 print(date_time_tag + f'[{log_level.value[0]}]: {message}')
