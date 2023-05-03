@@ -129,6 +129,8 @@ class Game(commands.Cog):
         """
         Will register a custom game as being 'owned' by the current user.
 
+        Example: **/game register Overwatch 2**
+
         :param ctx: The command context.
         :param game_title: The title of the game to register.
         :return: None
@@ -187,6 +189,8 @@ class Game(commands.Cog):
         """
         Will unregister a custom game as being 'owned' by the current user.
 
+        Example: **/game unregister Overwatch 2**
+
         :param ctx: The command context.
         :param game_title: The game title to unregister.
         :return: None
@@ -232,6 +236,8 @@ class Game(commands.Cog):
     async def list_custom_game_command(self, ctx) -> None:
         """
         Lists all the added custom game titles to the current user.
+
+        Example: **/game list**
 
         :param ctx: The command context.
         :return: None
