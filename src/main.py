@@ -260,7 +260,7 @@ async def ping_command(ctx, game_title: str) -> None:
 
     # Creating a new GameSelectView if the game title did not have an exact match.
     select_menu = discord.ui.View(timeout=10)
-    select_menu.add_item(GameSelectView(ctx, closest_matches_actual_titles))
+    select_menu.add_item(GameSelectView(closest_matches_actual_titles))
 
     await ctx.respond('Please select a game to find players for:', view=select_menu, ephemeral=True)
 
