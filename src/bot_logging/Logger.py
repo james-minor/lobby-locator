@@ -23,8 +23,8 @@ class Logger:
         """
         Constructor for the Logger class.
 
-        :param log_directory:
-        :param log_to_console:
+        :param log_directory: The directory where log files should be stored.
+        :param log_to_console: If True, the Logger will log information to the console.
         """
 
         self._log_directory = log_directory
