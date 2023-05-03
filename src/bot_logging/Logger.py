@@ -37,7 +37,7 @@ class Logger:
         :param message: The info / debug message to log.
         :return: None
         """
-        self.log(LogLevel.INFO, message)
+        self._log(LogLevel.INFO, message)
 
     def warn(self, message: str) -> None:
         """
@@ -46,7 +46,7 @@ class Logger:
         :param message: The warning message to log.
         :return: None
         """
-        self.log(LogLevel.WARN, message)
+        self._log(LogLevel.WARN, message)
 
     def critical(self, message: str) -> None:
         """
@@ -55,9 +55,9 @@ class Logger:
         :param message: The error message to log.
         :return: None
         """
-        self.log(LogLevel.CRITICAL, message)
+        self._log(LogLevel.CRITICAL, message)
 
-    def log(self, log_level: LogLevel, message: str) -> None:
+    def _log(self, log_level: LogLevel, message: str) -> None:
         """
         The internal logging method that is used to log messages to the current logging file.
 
