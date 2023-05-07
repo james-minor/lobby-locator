@@ -80,9 +80,6 @@ def initialize_database_tables() -> None:
             game_title VARCHAR(100) NOT NULL,
             game_title_lower VARCHAR(100) NOT NULL
         );
-        
-        DELETE FROM tb_games
-            WHERE steam_id IS NOT NULL;
 
         CREATE TABLE IF NOT EXISTS tb_owned_games(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
