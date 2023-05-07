@@ -87,6 +87,12 @@ def initialize_database_tables() -> None:
             discord_id VARCHAR(18) NOT NULL,
             FOREIGN KEY(game_title) REFERENCES tb_custom_games(game_title)
         );
+        
+        CREATE TABLE IF NOT EXISTS tb_blacklist(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            steam_id VARCHAR(10),
+            FOREIGN KEY(steam_id) REFERENCES tb_games(steam_id)
+        );
         """
     )
     cursor.close()
