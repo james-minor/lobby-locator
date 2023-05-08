@@ -78,7 +78,8 @@ def initialize_database_tables() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             steam_id VARCHAR(10),
             game_title VARCHAR(100) NOT NULL,
-            game_title_lower VARCHAR(100) NOT NULL
+            game_title_lower VARCHAR(100) NOT NULL,
+            UNIQUE(steam_id)
         );
 
         CREATE TABLE IF NOT EXISTS tb_owned_games(
@@ -117,7 +118,7 @@ def get_steam_app_data() -> None:
 
             cursor.execute(
                 """
-                INSERT INTO tb_games(steam_id, game_title, game_title_lower)
+                INSERT OR IGNORE INTO tb_games(steam_id, game_title, game_title_lower)
                 VALUES(?, ?, ?);
                 """,
                 [app['appid'], app['name'], app['name'].lower()]
