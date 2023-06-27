@@ -6,7 +6,7 @@
 
 ## Description
 
-A Python-based Discord bot to search for players who own specific games, using the Steam Web API.
+A NodeJS Discord bot to search for players who own specific games, using the Steam Web API.
 
 ## Features
 
