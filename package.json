@@ -1,0 +1,14 @@
+{
+  "name": "game_seeker_discord_bot",
+  "version": "0.0.0",
+  "description": "A Discord bot designed to help users find players to party up with in games.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Minor",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}
