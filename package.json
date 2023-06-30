@@ -4,11 +4,16 @@
   "description": "A Discord bot designed to help users find players to party up with in games.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx tsc"
   },
   "author": "James Minor",
   "license": "ISC",
   "devDependencies": {
+    "@types/sqlite3": "^3.1.8",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "sqlite3": "^5.1.6"
   }
 }
