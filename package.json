@@ -2,20 +2,18 @@
   "name": "game_seeker_discord_bot",
   "version": "0.0.0",
   "description": "A Discord bot designed to help users find players to party up with in games.",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "npx tsc && node index.js"
+    "start": "npx tsc && node ./dist/index.js"
   },
   "author": "James Minor",
   "license": "ISC",
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.4",
     "@types/sqlite3": "^3.1.8",
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "better-sqlite3": "^8.4.0",
-    "discord.js": "^14.11.0"
+    "discord.js": "^14.12.1"
   }
 }
