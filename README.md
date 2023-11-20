@@ -1,10 +1,8 @@
 # Looking to Play Discord Bot
 
-![GitHub repo size](https://img.shields.io/github/repo-size/james-minor/game_seeker_discord_bot)
-
 ## Description
 
-A NodeJS Discord bot to search for players who own specific games, using the Steam Web API.
+A Java-based Discord bot to search for players who own specific games, using the Steam Web API.
 
 ## Features
 
