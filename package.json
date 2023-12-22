@@ -1,0 +1,17 @@
+{
+	"name": "lobby-locator",
+	"version": "0.0.0",
+	"description": "A Discord bot to help you find Steam game lobbies.",
+	"scripts": {
+		"watch": "nodemon",
+		"start": "ts-node src/index.ts"
+	},
+	"author": "James Minor",
+	"license": "GNU GPL V3",
+	"dependencies": {
+		"@types/node": "^20.10.5",
+		"nodemon": "^3.0.2",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
+	}
+}
