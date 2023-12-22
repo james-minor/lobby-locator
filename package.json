@@ -2,16 +2,22 @@
 	"name": "lobby-locator",
 	"version": "0.0.0",
 	"description": "A Discord bot to help you find Steam game lobbies.",
+	"type": "module",
 	"scripts": {
-		"watch": "nodemon",
-		"start": "ts-node src/index.ts"
+		"setup": "npx prisma generate",
+		"watch": "npm run setup && nodemon",
+		"start": "npm run setup && ts-node src/index.ts"
 	},
 	"author": "James Minor",
 	"license": "GNU GPL V3",
 	"dependencies": {
+		"@prisma/client": "^5.7.1",
 		"@types/node": "^20.10.5",
 		"nodemon": "^3.0.2",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.3.3"
+	},
+	"devDependencies": {
+		"prisma": "^5.7.1"
 	}
 }
