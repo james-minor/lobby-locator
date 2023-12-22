@@ -4,7 +4,7 @@
 	"description": "A Discord bot to help you find Steam game lobbies.",
 	"type": "module",
 	"scripts": {
-		"setup": "npx prisma generate",
+		"setup": "npx prisma migrate dev --name init && npx prisma generate",
 		"watch": "npm run setup && nodemon",
 		"start": "npm run setup && ts-node src/index.ts"
 	},
