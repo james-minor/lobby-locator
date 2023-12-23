@@ -3,13 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Game {
   steamId    Int         @id
-  name       String      @unique
+  name       String
   blacklists Blacklist[]
 
   @@map("games")
@@ -25,9 +25,9 @@ model User {
 
 model Blacklist {
   id            Int  @id @default(autoincrement())
-  user          User @relation(fields: [userDiscordId], references: [discordId])
+  user          User @relation(fields: [userDiscordId], references: [discordId], onDelete: Cascade)
   userDiscordId Int
-  game          Game @relation(fields: [gameSteamId], references: [steamId])
+  game          Game @relation(fields: [gameSteamId], references: [steamId], onDelete: NoAction)
   gameSteamId   Int
 
   @@map("blacklists")
