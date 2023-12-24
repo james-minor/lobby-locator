@@ -1,4 +1,4 @@
-import SteamApp from './SteamApp.ts';
+import SteamApp from '../interfaces/SteamApp.ts';
 
 /**
  * Fetches the Steam app data for every application on Steam from the Steam API.

@@ -1,6 +1,6 @@
 import { Game } from '@prisma/client';
 import prismaClient from '../prismaClient.ts';
-import SteamApp from './SteamApp.ts';
+import SteamApp from '../interfaces/SteamApp.ts';
 
 /**
  * Inserts a passed SteamApp array into the local database.
