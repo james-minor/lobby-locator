@@ -11,7 +11,7 @@ export default async function deployApplicationCommands(commands: Collection<str
 	
 	// Iterating over the command collection and placing the data into an array (to push to Discord API).
 	const commandData: any[] = [];
-	commands.forEach((value, key) =>
+	commands.forEach((value) =>
 	{
 		commandData.push(value.data.toJSON())
 	});
