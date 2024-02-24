@@ -1,0 +1,11 @@
+# IDE folders
+.idea
+
+# Ignoring environment variable files.
+.env
+.env.*
+!.env.example
+
+# Ignoring database files.
+data
+*.sqlite
