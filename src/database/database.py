@@ -63,6 +63,7 @@ class Database:
             );
             """
         )
+        cursor.close()
 
         return True
 
@@ -76,26 +77,26 @@ class Database:
         :return: The number of steam games added to the database.
         """
 
-        # Safeguard against empty dictionaries clearing out the games table.
-        if len(steam_apps) == 0:
-            return 0
-
-        # Truncating the steam games table.
         cursor = self.connection.cursor()
-        cursor.execute("DELETE FROM tb_steam_games")
+
+        # Getting the initial table size.
+        table_start_size = cursor.execute('SELECT COUNT(id) FROM tb_steam_games').fetchone()[0]
 
         # Inserting new data into the steam games table.
         for app_id in steam_apps:
             cursor.execute(
                 """
-                INSERT INTO tb_steam_games(steam_id, game_title, game_title_lower) 
+                INSERT OR IGNORE INTO tb_steam_games(steam_id, game_title, game_title_lower) 
                 VALUES (?, ?, ?)
                 """,
                 [
                     app_id,
                     steam_apps[app_id],
-                    steam_apps[app_id].lower(),
+                    steam_apps[app_id].lower()
                 ]
             )
 
-        return cursor.lastrowid
+        # Committing the transaction to prevent the database from locking.
+        self.connection.commit()
+
+        return cursor.execute('SELECT COUNT(id) FROM tb_steam_games').fetchone()[0] - table_start_size
