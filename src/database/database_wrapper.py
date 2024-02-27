@@ -2,8 +2,8 @@ import sqlite3
 from sqlite3 import Error, Connection
 
 
-class Database:
-    """Class to handle communicating with the SQL database."""
+class DatabaseWrapper:
+    """Wrapper class to assist in communicating with the SQL database."""
 
     connection: None | Connection
     """The connection to the SQL database."""

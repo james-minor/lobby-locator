@@ -1,1 +1,1 @@
-from .database import Database
+from .database_wrapper import DatabaseWrapper

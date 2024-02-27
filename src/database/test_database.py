@@ -1,12 +1,12 @@
 import os
 import unittest
 
-from database import Database
+from database_wrapper import DatabaseWrapper
 
 
 class ConnectionTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.database = Database()
+        self.database = DatabaseWrapper()
 
     def test_opening_connection(self):
         self.assertTrue(self.database.connect('test.sqlite'))
@@ -26,7 +26,7 @@ class ConnectionTestCase(unittest.TestCase):
 
 class CreateTablesTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.database = Database()
+        self.database = DatabaseWrapper()
 
     def test_bad_connection(self):
         self.assertFalse(self.database.create_tables())
@@ -45,7 +45,7 @@ class CreateTablesTestCase(unittest.TestCase):
 
 class RefreshingSteamGamesTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.database = Database()
+        self.database = DatabaseWrapper()
         self.database.connect('test.sqlite')
         self.database.create_tables()
 
