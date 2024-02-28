@@ -9,3 +9,7 @@
 # Ignoring database files.
 data
 *.sqlite
+
+# Ignoring test-generated files and reports.
+.coverage
+htmlcov
