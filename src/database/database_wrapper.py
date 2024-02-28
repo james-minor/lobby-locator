@@ -48,6 +48,7 @@ class DatabaseWrapper:
         cursor = self.connection.cursor()
         cursor.executescript(
             """
+            -- Table to hold user data.
             CREATE TABLE IF NOT EXISTS tb_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 discord_id VARCHAR(18) NOT NULL,
@@ -70,36 +71,34 @@ class DatabaseWrapper:
 
         return True
 
-    def refresh_steam_games(self, steam_apps: dict[int, str]) -> int:
+    def update_steam_apps_table(self, steam_apps: dict[int, str]) -> int:
         """
-        Deletes and then repopulates the steam_games database table.
+        Updates the Steam apps table.
 
-        :param steam_apps: Dictionary of steam_apps to repopulate with. If passed an empty dictionary, the table
-        will not be emptied, and the current state of the table will be maintained.
-
-        :return: The number of steam games added to the database.
+        :param steam_apps: Dictionary of steam_apps to insert into the tb_steam_apps table.
+        :return: The number of steam apps added to the database.
         """
 
         cursor = self.connection.cursor()
 
         # Getting the initial table size.
-        table_start_size = cursor.execute('SELECT COUNT(id) FROM tb_steam_games').fetchone()[0]
+        table_start_size = cursor.execute('SELECT COUNT(steam_id) FROM tb_steam_apps').fetchone()[0]
 
         # Inserting new data into the steam games table.
         for app_id in steam_apps:
             cursor.execute(
                 """
-                INSERT OR IGNORE INTO tb_steam_games(steam_id, game_title, game_title_lower) 
-                VALUES (?, ?, ?)
+                INSERT OR IGNORE INTO tb_steam_apps(steam_id, game_title) 
+                VALUES (?, ?)
                 """,
                 [
                     app_id,
-                    steam_apps[app_id],
-                    steam_apps[app_id].lower()
+                    steam_apps[app_id]
                 ]
             )
 
         # Committing the transaction to prevent the database from locking.
         self.connection.commit()
 
-        return cursor.execute('SELECT COUNT(id) FROM tb_steam_games').fetchone()[0] - table_start_size
+        return cursor.execute('SELECT COUNT(steam_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
+
