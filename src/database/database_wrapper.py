@@ -17,6 +17,7 @@ class DatabaseWrapper:
         successful, False otherwise.
 
         :param connection_string: The connection string for the database.
+        :return: True if the connection is successful, False otherwise
         """
 
         try:
