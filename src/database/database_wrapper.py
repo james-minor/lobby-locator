@@ -13,8 +13,7 @@ class DatabaseWrapper:
 
     def connect(self, connection_string: str) -> bool:
         """
-        Connects to an SQL database via the passed connection_string parameter, returns True if the connection is
-        successful, False otherwise.
+        Creates a connection to an SQLite database via the passed connection_string parameter.
 
         :param connection_string: The connection string for the database.
         :return: True if the connection is successful, False otherwise
