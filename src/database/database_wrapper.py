@@ -54,12 +54,15 @@ class DatabaseWrapper:
                 steam_id VARCHAR(17)
             );
 
-            CREATE TABLE IF NOT EXISTS tb_steam_games(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                steam_id INTEGER NOT NULL,
-                game_title VARCHAR(100) NOT NULL,
-                game_title_lower VARCHAR(100) NOT NULL,
-                UNIQUE(steam_id)
+            -- Table to hold Steam app data for every app on Steam.
+            CREATE TABLE IF NOT EXISTS tb_steam_apps(
+                steam_id INTEGER PRIMARY KEY,
+                game_title VARCHAR(100) NOT NULL UNIQUE
+            );
+            
+            -- Table to hold data for games owned by registered users.
+            CREATE TABLE IF NOT EXISTS tb_owned_games(
+                steam_id INTEGER PRIMARY KEY
             );
             """
         )
