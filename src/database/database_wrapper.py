@@ -84,6 +84,10 @@ class DatabaseWrapper:
         :return: The number of steam apps added to the database.
         """
 
+        # Safeguard if a connection is not open.
+        if self.connection is None:
+            return 0
+
         cursor = self.connection.cursor()
 
         # Getting the initial table size.
