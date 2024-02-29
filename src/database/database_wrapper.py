@@ -33,7 +33,7 @@ class DatabaseWrapper:
     def disconnect(self) -> None:
         """Safely closes the SQLite database connection."""
 
-        if self.connection is not None:
+        if self.connection:
             self.connection.commit()
             self.connection.close()
             self.connection = None
