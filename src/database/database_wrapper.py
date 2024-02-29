@@ -16,16 +16,19 @@ class DatabaseWrapper:
         Creates a connection to an SQLite database via the passed connection_string parameter.
 
         :param connection_string: The connection string for the database.
-        :return: True if the connection is successful, False otherwise
+        :return: True if the connection was successful, False otherwise.
         """
 
+        # Attempting to cleanly open an SQLite connection.
         try:
             self.connection = sqlite3.connect(connection_string)
-            return True
-        except Error as error:
-            print(error)
+        except sqlite3.Error as error:
+            print(f'SQLite error while creating database connection: {error}')
+            self.disconnect()  # Cleaning up active connection if error thrown.
 
-        return False
+            return False
+
+        return True
 
     def disconnect(self) -> None:
         """Safely closes the SQLite database connection."""
