@@ -45,9 +45,11 @@ class DatabaseWrapper:
         :return: True if the tables were created successfully, False otherwise.
         """
 
+        # Safeguard if a connection is not open.
         if self.connection is None:
             return False
 
+        # Creating the SQL tables.
         cursor = self.connection.cursor()
         cursor.executescript(
             """
