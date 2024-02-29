@@ -4,7 +4,7 @@ from unittest.mock import patch
 import dotenv
 import requests
 
-from steam import SteamAPIHandler
+from steam_api_handler import SteamAPIHandler
 
 # Fetching the Steam API key.
 dotenv.load_dotenv()

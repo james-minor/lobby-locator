@@ -1,1 +1,1 @@
-from .steam import SteamAPIHandler
+from .steam_api_handler import SteamAPIHandler
