@@ -1,64 +1,120 @@
 import os
+import sqlite3
+import tempfile
 import unittest
+from unittest.mock import patch
 
-from database_wrapper import DatabaseWrapper
+from .database_wrapper import DatabaseWrapper
 
 
-class ConnectionTestCase(unittest.TestCase):
+class ConnectMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.connect() method.
+    """
+
     def setUp(self) -> None:
         self.database = DatabaseWrapper()
 
-    def test_opening_connection(self):
-        self.assertTrue(self.database.connect('test.sqlite'))
+    def test_valid_connection_string(self) -> None:
+        # Creating a temporary file.
+        temp_file_handle = tempfile.NamedTemporaryFile(suffix='.sqlite', delete=False)
+        temp_file_path = temp_file_handle.name
 
-    def test_closing_connection(self):
-        self.database.connect('test.sqlite')
+        # Validating the connection.
+        connected = self.database.connect(temp_file_path)
+        self.assertTrue(connected)
+
+        # Cleaning up the temporary file.
         self.database.disconnect()
-        self.assertIsNone(self.database.connection)
+        temp_file_handle.close()
+        os.unlink(temp_file_path)
 
-    def tearDown(self):
-        self.database.disconnect()
+    def test_empty_connection_string(self) -> None:
+        connected = self.database.connect('')
 
-    @classmethod
-    def tearDownClass(cls):
-        os.remove('test.sqlite')
+        self.assertTrue(connected)
+
+    @patch('sqlite3.connect')
+    def test_mocking_sqlite_error(self, mock_sqlite_connect) -> None:
+        mock_sqlite_connect.side_effect = sqlite3.Error('Mocking an SQLite error.')
+
+        with tempfile.TemporaryFile(suffix='.sqlite') as temp_db_file:
+            connected = self.database.connect(temp_db_file.name)
+
+        self.assertFalse(connected)
 
 
-class CreateTablesTestCase(unittest.TestCase):
+class DisconnectMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.disconnect() method.
+    """
+
     def setUp(self) -> None:
         self.database = DatabaseWrapper()
 
-    def test_bad_connection(self):
-        self.assertFalse(self.database.create_tables())
+    def test_disconnect_with_open_connection(self) -> None:
+        self.database.connect(':memory:')
 
-    def test_all_tables_created(self):
-        self.database.connect('test.sqlite')
-        self.assertTrue(self.database.create_tables())
+        try:
+            self.database.disconnect()
+        except sqlite3.Error as error:
+            self.fail(f'Threw an SQLite exception: {error}')
 
-    def tearDown(self):
-        self.database.disconnect()
+    def test_disconnect_with_closed_connection(self) -> None:
+        try:
+            self.database.disconnect()
+        except sqlite3.Error as error:
+            self.fail(f'Threw an SQLite exception: {error}')
 
-    @classmethod
-    def tearDownClass(cls):
-        os.remove('test.sqlite')
 
+class CreateTablesMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.create_tables() method.
+    """
 
-class RefreshingSteamGamesTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.database = DatabaseWrapper()
-        self.database.connect('test.sqlite')
+        self.database.connect('')
+
+    def test_creating_tables(self) -> None:
+        try:
+            self.database.create_tables()
+        except sqlite3.Error as error:
+            self.fail(f'Threw an SQLite exception: {error}')
+
+    def test_calling_with_closed_connection(self) -> None:
+        self.database.disconnect()
+
+        try:
+            self.database.create_tables()
+        except sqlite3.Error as error:
+            self.fail(f'Threw an SQLite exception: {error}')
+
+
+class UpdateSteamAppsTableMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.update_steam_apps_table() method.
+    """
+
+    def setUp(self) -> None:
+        self.database = DatabaseWrapper()
+        self.database.connect('')
         self.database.create_tables()
 
-    def test_empty_games_dictionary(self):
-        self.database.refresh_steam_games({0: 'test 1', 1: 'test 2', 2: 'test 3'})
-        self.assertEqual(self.database.refresh_steam_games({}), 0)
+    def test_valid_dictionary(self) -> None:
+        row_count = self.database.update_steam_apps_table({1: 'app_1', 2: 'app_2', 3: 'app_3'})
+        self.assertEqual(row_count, 3)
 
-    def test_all_games_refreshed(self):
-        self.assertEqual(self.database.refresh_steam_games({0: 'test 1', 1: 'test 2', 2: 'test 3'}), 3)
+    def test_empty_dictionary(self) -> None:
+        row_count = self.database.update_steam_apps_table({})
+        self.assertEqual(row_count, 0)
 
-    def tearDown(self):
+    def test_multiple_insertions_of_same_key(self) -> None:
+        self.database.update_steam_apps_table({1: 'app_1'})
+        row_count = self.database.update_steam_apps_table({1: 'app_1'})
+        self.assertEqual(row_count, 0)
+
+    def test_calling_with_closed_connection(self) -> None:
         self.database.disconnect()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.remove('test.sqlite')
+        row_count = self.database.update_steam_apps_table({1: 'app_1'})
+        self.assertEqual(row_count, 0)
