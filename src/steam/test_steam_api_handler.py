@@ -66,6 +66,10 @@ class GetIDFromURLMethodTests(unittest.TestCase):
         steam_id = self.steam_api.get_id_from_url('https://steamcommunity.com/profiles/76561198103635351/')
         self.assertEqual(steam_id, '76561198103635351')
 
+    def test_with_id(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('76561198103635351')
+        self.assertEqual(steam_id, '')
+
     def test_non_steam_url(self) -> None:
         steam_id = self.steam_api.get_id_from_url('https://www.example.com/')
         self.assertEqual(steam_id, '')
