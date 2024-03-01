@@ -1,5 +1,5 @@
 import sqlite3
-from sqlite3 import Error, Connection
+from sqlite3 import Connection
 
 
 class DatabaseWrapper:
