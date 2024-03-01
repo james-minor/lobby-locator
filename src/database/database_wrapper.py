@@ -56,8 +56,8 @@ class DatabaseWrapper:
             -- Table to hold user data.
             CREATE TABLE IF NOT EXISTS tb_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                discord_id VARCHAR(18) NOT NULL,
-                steam_id VARCHAR(17)
+                discord_id VARCHAR(18) NOT NULL UNIQUE,
+                steam_id VARCHAR(17) NOT NULL
             );
 
             -- Table to hold Steam app data for every app on Steam.
