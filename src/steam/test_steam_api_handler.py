@@ -58,11 +58,11 @@ class GetIDFromURLMethodTests(unittest.TestCase):
         steam_id = self.steam_api.get_id_from_url('https://steamcommunity.com/id/_M1nor/')
         self.assertEqual(steam_id, '76561198103635351')
 
-    def test_url_with_id(self) -> None:
+    def test_url_with_id_url(self) -> None:
         steam_id = self.steam_api.get_id_from_url('https://steamcommunity.com/profiles/76561198103635351')
         self.assertEqual(steam_id, '76561198103635351')
 
-    def test_url_with_id_with_trailing_slash(self) -> None:
+    def test_url_with_id_url_with_trailing_slash(self) -> None:
         steam_id = self.steam_api.get_id_from_url('https://steamcommunity.com/profiles/76561198103635351/')
         self.assertEqual(steam_id, '76561198103635351')
 
