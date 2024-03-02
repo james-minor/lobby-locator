@@ -94,17 +94,13 @@ class DatabaseWrapper:
         table_start_size = cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
 
         # Inserting new data into the steam games table.
-        for app_id in steam_apps:
-            cursor.execute(
-                """
+        cursor.executemany(
+            '''
                 INSERT OR IGNORE INTO tb_steam_apps(steam_app_id, game_title) 
                 VALUES (?, ?)
-                """,
-                [
-                    app_id,
-                    steam_apps[app_id]
-                ]
-            )
+            ''',
+            zip(steam_apps.keys(), steam_apps.values())
+        )
 
         # Committing the transaction to prevent the database from locking.
         self.connection.commit()
