@@ -1,4 +1,6 @@
 import json
+from typing import List, Dict
+
 import requests
 
 
@@ -87,7 +89,7 @@ class SteamAPIHandler:
 
         return ''
 
-    def fetch_app_list(self) -> dict[int, str]:
+    def fetch_app_list(self) -> Dict[int, str]:
         """
         A function that fetches a list of every app from Steam.
 
@@ -114,7 +116,7 @@ class SteamAPIHandler:
 
         return {}
 
-    def fetch_owned_games(self, steam_id: str) -> list[int]:
+    def fetch_owned_games(self, steam_id: str) -> List[int]:
         """
         A method that gets the ID of every game a Steam user owns.
 
