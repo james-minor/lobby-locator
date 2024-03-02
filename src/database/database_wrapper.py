@@ -1,4 +1,5 @@
 import sqlite3
+from contextlib import closing
 from sqlite3 import Connection
 
 
@@ -50,30 +51,29 @@ class DatabaseWrapper:
             return False
 
         # Creating the SQL tables.
-        cursor = self.connection.cursor()
-        cursor.executescript(
-            """
-            -- Table to hold user data.
-            CREATE TABLE IF NOT EXISTS tb_users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                discord_id VARCHAR(18) NOT NULL UNIQUE,
-                steam_user_id VARCHAR(17) NOT NULL
-            );
-
-            -- Table to hold Steam app data for every app on Steam.
-            CREATE TABLE IF NOT EXISTS tb_steam_apps(
-                steam_app_id INTEGER PRIMARY KEY,
-                game_title VARCHAR(100) NOT NULL UNIQUE
-            );
-            
-            -- Table to hold data for games owned by registered users.
-            CREATE TABLE IF NOT EXISTS tb_owned_games(
-                steam_app_id INTEGER PRIMARY KEY,
-                FOREIGN KEY (steam_app_id) REFERENCES tb_steam_apps(steam_app_id)
-            );
-            """
-        )
-        cursor.close()
+        with closing(self.connection.cursor()) as cursor:
+            cursor.executescript(
+                """
+                -- Table to hold user data.
+                CREATE TABLE IF NOT EXISTS tb_users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    discord_id VARCHAR(18) NOT NULL UNIQUE,
+                    steam_user_id VARCHAR(17) NOT NULL
+                );
+    
+                -- Table to hold Steam app data for every app on Steam.
+                CREATE TABLE IF NOT EXISTS tb_steam_apps(
+                    steam_app_id INTEGER PRIMARY KEY,
+                    game_title VARCHAR(100) NOT NULL UNIQUE
+                );
+                
+                -- Table to hold data for games owned by registered users.
+                CREATE TABLE IF NOT EXISTS tb_owned_games(
+                    steam_app_id INTEGER PRIMARY KEY,
+                    FOREIGN KEY (steam_app_id) REFERENCES tb_steam_apps(steam_app_id)
+                );
+                """
+            )
 
         return True
 
@@ -89,24 +89,24 @@ class DatabaseWrapper:
         if self.connection is None:
             return 0
 
-        cursor = self.connection.cursor()
+        with closing(self.connection.cursor()) as cursor:
 
-        # Getting the initial table size.
-        table_start_size = cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
+            # Getting the initial table size.
+            table_start_size = cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
 
-        # Inserting new data into the steam games table.
-        cursor.executemany(
-            '''
-                INSERT OR IGNORE INTO tb_steam_apps(steam_app_id, game_title) 
-                VALUES (?, ?)
-            ''',
-            zip(steam_apps.keys(), steam_apps.values())
-        )
+            # Inserting new data into the steam games table.
+            cursor.executemany(
+                '''
+                    INSERT OR IGNORE INTO tb_steam_apps(steam_app_id, game_title) 
+                    VALUES (?, ?)
+                ''',
+                zip(steam_apps.keys(), steam_apps.values())
+            )
 
-        # Committing the transaction to prevent the database from locking.
-        self.connection.commit()
+            # Committing the transaction to prevent the database from locking.
+            self.connection.commit()
 
-        return cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
+            return cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
 
     def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> None:
         """
@@ -123,17 +123,16 @@ class DatabaseWrapper:
         if steam_user_id == '':
             raise ValueError('Parameter steam_id cannot be empty string.')
 
-        # Upserting the entry into the database.
-        cursor = self.connection.cursor()
-        cursor.execute(
-            '''
-            INSERT INTO tb_users (discord_id, steam_user_id)
-            VALUES (?, ?)
-            ON CONFLICT (discord_id)
-            DO UPDATE SET steam_user_id = excluded.steam_user_id
-            ''',
-            [discord_id, steam_user_id]
-        )
+        with closing(self.connection.cursor()) as cursor:
+            cursor.execute(
+                '''
+                INSERT INTO tb_users (discord_id, steam_user_id)
+                VALUES (?, ?)
+                ON CONFLICT (discord_id)
+                DO UPDATE SET steam_user_id = excluded.steam_user_id
+                ''',
+                [discord_id, steam_user_id]
+            )
 
         # Committing and closing cursor.
         self.connection.commit()
