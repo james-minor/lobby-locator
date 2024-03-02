@@ -120,3 +120,31 @@ class FetchAppListMethodTests(unittest.TestCase):
 
         app_list = self.steam_api.fetch_app_list()
         self.assertEqual(len(app_list), 0)
+
+
+class FetchOwnedGamesMethodTests(unittest.TestCase):
+    """
+    Test cases for the SteamAPIHandler.fetch_owned_games() method.
+    """
+
+    def setUp(self) -> None:
+        self.steam_api = SteamAPIHandler(steam_api_key)
+
+    def test_successful_fetch(self) -> None:
+        owned_games = self.steam_api.fetch_owned_games('76561198103635351')
+        self.assertGreater(len(owned_games), 0)
+
+    def test_user_not_found(self) -> None:
+        owned_games = self.steam_api.fetch_owned_games('invalid_steam_id')
+        self.assertEqual(len(owned_games), 0)
+
+    def test_empty_steam_id(self) -> None:
+        owned_games = self.steam_api.fetch_owned_games('')
+        self.assertEqual(len(owned_games), 0)
+
+    @patch('requests.get')
+    def test_mocking_api_is_down(self, mock_requests_get) -> None:
+        mock_requests_get.side_effect = requests.exceptions.ConnectionError('Mocking no connection to API.')
+
+        owned_games = self.steam_api.fetch_owned_games('76561198103635351')
+        self.assertEqual(len(owned_games), 0)
