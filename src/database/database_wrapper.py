@@ -70,7 +70,8 @@ class DatabaseWrapper:
                 
                 -- Table to hold data for games owned by registered users.
                 CREATE TABLE IF NOT EXISTS tb_owned_games(
-                    steam_app_id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    steam_app_id INTEGER NOT NULL,
                     steam_user_id VARCHAR(17) NOT NULL,
                     FOREIGN KEY (steam_app_id) REFERENCES tb_steam_apps(steam_app_id),
                     FOREIGN KEY (steam_user_id) REFERENCES tb_users(steam_user_id)
