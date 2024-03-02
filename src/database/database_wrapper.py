@@ -62,7 +62,7 @@ class DatabaseWrapper:
 
             -- Table to hold Steam app data for every app on Steam.
             CREATE TABLE IF NOT EXISTS tb_steam_apps(
-                steam_id INTEGER PRIMARY KEY,
+                steam_app_id INTEGER PRIMARY KEY,
                 game_title VARCHAR(100) NOT NULL UNIQUE
             );
             
@@ -91,13 +91,13 @@ class DatabaseWrapper:
         cursor = self.connection.cursor()
 
         # Getting the initial table size.
-        table_start_size = cursor.execute('SELECT COUNT(steam_id) FROM tb_steam_apps').fetchone()[0]
+        table_start_size = cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
 
         # Inserting new data into the steam games table.
         for app_id in steam_apps:
             cursor.execute(
                 """
-                INSERT OR IGNORE INTO tb_steam_apps(steam_id, game_title) 
+                INSERT OR IGNORE INTO tb_steam_apps(steam_app_id, game_title) 
                 VALUES (?, ?)
                 """,
                 [
@@ -109,7 +109,7 @@ class DatabaseWrapper:
         # Committing the transaction to prevent the database from locking.
         self.connection.commit()
 
-        return cursor.execute('SELECT COUNT(steam_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
+        return cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
 
     def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> None:
         """
