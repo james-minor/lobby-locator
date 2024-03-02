@@ -138,8 +138,8 @@ class SetSteamIDMethodTests(unittest.TestCase):
 
     def test_multiple_inserts(self) -> None:
         self.database.set_steam_user_id('1', '1')
-        self.database.set_steam_user_id('2', '1')
-        self.database.set_steam_user_id('3', '2')
+        self.database.set_steam_user_id('2', '2')
+        self.database.set_steam_user_id('3', '3')
 
         row_count = self.database.connection.execute('SELECT COUNT(id) FROM tb_users').fetchone()[0]
         self.assertEqual(row_count, 3)
@@ -147,6 +147,13 @@ class SetSteamIDMethodTests(unittest.TestCase):
     def test_updating_steam_id(self) -> None:
         self.database.set_steam_user_id('1', '1')
         self.database.set_steam_user_id('1', '2')
+
+        row_count = self.database.connection.execute('SELECT COUNT(id) FROM tb_users').fetchone()[0]
+        self.assertEqual(row_count, 1)
+
+    def test_setting_existing_steam_id(self):
+        self.assertTrue(self.database.set_steam_user_id('1', '1'))
+        self.assertFalse(self.database.set_steam_user_id('2', '1'))
 
         row_count = self.database.connection.execute('SELECT COUNT(id) FROM tb_users').fetchone()[0]
         self.assertEqual(row_count, 1)

@@ -111,13 +111,14 @@ class DatabaseWrapper:
 
             return cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
 
-    def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> None:
+    def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> bool:
         """
         Associates a user's Discord ID with a passed Steam ID.
 
         :param discord_id: The Discord ID to set the Steam ID of.
         :param steam_user_id: The Steam 64 ID to associate with the Discord ID.
         :raises ValueError: If either discord_id or steam_id are empty strings.
+        :return: True if the Steam ID was set successfully, False otherwise.
         """
 
         # Validating parameters.
@@ -127,15 +128,20 @@ class DatabaseWrapper:
             raise ValueError('Parameter steam_id cannot be empty string.')
 
         with closing(self.connection.cursor()) as cursor:
-            cursor.execute(
-                '''
-                INSERT INTO tb_users (discord_id, steam_user_id)
-                VALUES (?, ?)
-                ON CONFLICT (discord_id)
-                DO UPDATE SET steam_user_id = excluded.steam_user_id
-                ''',
-                [discord_id, steam_user_id]
-            )
+            try:
+                cursor.execute(
+                    '''
+                    INSERT INTO tb_users (discord_id, steam_user_id)
+                    VALUES (?, ?)
+                    ON CONFLICT (discord_id)
+                    DO UPDATE SET steam_user_id = excluded.steam_user_id
+                    ''',
+                    [discord_id, steam_user_id]
+                )
+            except sqlite3.IntegrityError:
+                return False
+
+        return True
 
         # Committing and closing cursor.
         self.connection.commit()
