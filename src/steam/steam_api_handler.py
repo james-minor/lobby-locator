@@ -113,3 +113,28 @@ class SteamAPIHandler:
             return apps
 
         return {}
+
+    def fetch_owned_games(self, steam_id: str) -> list[int]:
+        """
+        A method that gets the ID of every game a Steam user owns.
+
+        :param steam_id: The Steam ID of the user to get the owned games for.
+        :return: A list of Steam application IDs.
+        """
+
+        request_uri = f'{self._api_root}/IPlayerService/GetOwnedGames/v0001/?key={self._api_key}&steamid={steam_id}'
+        try:
+            response = requests.get(request_uri)
+        except requests.exceptions.ConnectionError:
+            return []
+
+        if response.status_code == 200:
+            apps = []
+            data = response.json()
+
+            for app in data['response']['games']:
+                apps.append(int(app['appid']))
+
+            return apps
+
+        return []
