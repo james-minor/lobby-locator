@@ -30,7 +30,8 @@ class SteamAPIHandler:
         Checks if a passed Steam ID is connected to an existing Steam account.
 
         :param steam_id: The Steam ID to validate.
-        :return: True if the passed Steam ID is connected to a Steam account, False otherwise.
+        :return: True if the passed Steam ID is connected to a Steam account, False otherwise. Note that this will
+        return true if passed a valid Steam profile URL that contains a valid Steam ID.
         """
 
         request_uri = f'{self._api_root}/ISteamUser/GetPlayerSummaries/v0002/?key={self._api_key}&steamids={steam_id}'
