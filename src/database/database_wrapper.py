@@ -57,7 +57,7 @@ class DatabaseWrapper:
             CREATE TABLE IF NOT EXISTS tb_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 discord_id VARCHAR(18) NOT NULL UNIQUE,
-                steam_id VARCHAR(17) NOT NULL
+                steam_user_id VARCHAR(17) NOT NULL
             );
 
             -- Table to hold Steam app data for every app on Steam.
@@ -111,31 +111,31 @@ class DatabaseWrapper:
 
         return cursor.execute('SELECT COUNT(steam_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
 
-    def set_steam_id(self, discord_id: str, steam_id: str) -> None:
+    def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> None:
         """
         Associates a user's Discord ID with a passed Steam ID.
 
         :param discord_id: The Discord ID to set the Steam ID of.
-        :param steam_id: The Steam 64 ID to associate with the Discord ID.
+        :param steam_user_id: The Steam 64 ID to associate with the Discord ID.
         :raises ValueError: If either discord_id or steam_id are empty strings.
         """
 
         # Validating parameters.
         if discord_id == '':
             raise ValueError('Parameter discord_id cannot be empty string.')
-        if steam_id == '':
+        if steam_user_id == '':
             raise ValueError('Parameter steam_id cannot be empty string.')
 
         # Upserting the entry into the database.
         cursor = self.connection.cursor()
         cursor.execute(
             '''
-            INSERT INTO tb_users (discord_id, steam_id)
+            INSERT INTO tb_users (discord_id, steam_user_id)
             VALUES (?, ?)
             ON CONFLICT (discord_id)
-            DO UPDATE SET steam_id = excluded.steam_id
+            DO UPDATE SET steam_user_id = excluded.steam_user_id
             ''',
-            [discord_id, steam_id]
+            [discord_id, steam_user_id]
         )
 
         # Committing and closing cursor.
