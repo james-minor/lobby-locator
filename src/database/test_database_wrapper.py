@@ -118,3 +118,50 @@ class UpdateSteamAppsTableMethodTests(unittest.TestCase):
         self.database.disconnect()
         row_count = self.database.update_steam_apps_table({1: 'app_1'})
         self.assertEqual(row_count, 0)
+
+
+class SetSteamIDMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.set_steam_id() method.
+    """
+
+    def setUp(self) -> None:
+        self.database = DatabaseWrapper()
+        self.database.connect('')
+        self.database.create_tables()
+
+    def test_inserting_steam_id(self) -> None:
+        self.database.set_steam_id('1', '1')
+
+        row_count = self.database.connection.execute('SELECT COUNT(id) FROM tb_users').fetchone()[0]
+        self.assertEqual(row_count, 1)
+
+    def test_multiple_inserts(self) -> None:
+        self.database.set_steam_id('1', '1')
+        self.database.set_steam_id('2', '1')
+        self.database.set_steam_id('3', '2')
+
+        row_count = self.database.connection.execute('SELECT COUNT(id) FROM tb_users').fetchone()[0]
+        self.assertEqual(row_count, 3)
+
+    def test_updating_steam_id(self) -> None:
+        self.database.set_steam_id('1', '1')
+        self.database.set_steam_id('1', '2')
+
+        row_count = self.database.connection.execute('SELECT COUNT(id) FROM tb_users').fetchone()[0]
+        self.assertEqual(row_count, 1)
+
+    def test_inserting_empty_steam_id(self) -> None:
+        with self.assertRaises(ValueError):
+            self.database.set_steam_id('1', '')
+
+    def test_inserting_steam_id_empty_discord_id(self) -> None:
+        with self.assertRaises(ValueError):
+            self.database.set_steam_id('', '1')
+
+    def test_both_ids_empty(self) -> None:
+        with self.assertRaises(ValueError):
+            self.database.set_steam_id('', '')
+
+    def tearDown(self) -> None:
+        self.database.disconnect()
