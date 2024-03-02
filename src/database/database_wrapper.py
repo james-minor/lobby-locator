@@ -68,7 +68,7 @@ class DatabaseWrapper:
             
             -- Table to hold data for games owned by registered users.
             CREATE TABLE IF NOT EXISTS tb_owned_games(
-                steam_id INTEGER PRIMARY KEY
+                steam_app_id INTEGER PRIMARY KEY
             );
             """
         )
