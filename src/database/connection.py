@@ -9,6 +9,11 @@ class Connection(sqlite3.Connection):
     def __init__(self, connection_string: str, **kwargs):
         super().__init__(connection_string, **kwargs)
 
+        self._is_open: bool = True
+        """
+        Is the connection to the database currently open?
+        """
+
     def disconnect(self) -> bool:
         """
         Safely closes the database connection, committing any pending transactions before doing so.
@@ -22,5 +27,12 @@ class Connection(sqlite3.Connection):
         except sqlite3.ProgrammingError:
             return False
 
+        self._is_open = False
         self.close()
         return True
+
+    def is_open(self) -> bool:
+        """
+        :returns: True if the connection is open, False otherwise.
+        """
+        return self._is_open
