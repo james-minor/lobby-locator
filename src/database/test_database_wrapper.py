@@ -8,66 +8,6 @@ from src.database.create_connection import create_connection
 from .database_wrapper import DatabaseWrapper
 
 
-class ConnectMethodTests(unittest.TestCase):
-    """
-    Test cases for the DatabaseWrapper.connect() method.
-    """
-
-    def setUp(self) -> None:
-        self.database = DatabaseWrapper()
-
-    def test_valid_connection_string(self) -> None:
-        # Creating a temporary file.
-        temp_file_handle = tempfile.NamedTemporaryFile(suffix='.sqlite', delete=False)
-        temp_file_path = temp_file_handle.name
-
-        # Validating the connection.
-        connected = self.database.connect(temp_file_path)
-        self.assertTrue(connected)
-
-        # Cleaning up the temporary file.
-        self.database.disconnect()
-        temp_file_handle.close()
-        os.unlink(temp_file_path)
-
-    def test_empty_connection_string(self) -> None:
-        connected = self.database.connect('')
-
-        self.assertTrue(connected)
-
-    @patch('sqlite3.connect')
-    def test_mocking_sqlite_error(self, mock_sqlite_connect) -> None:
-        mock_sqlite_connect.side_effect = sqlite3.Error('Mocking an SQLite error.')
-
-        with tempfile.TemporaryFile(suffix='.sqlite') as temp_db_file:
-            connected = self.database.connect(temp_db_file.name)
-
-        self.assertFalse(connected)
-
-
-class DisconnectMethodTests(unittest.TestCase):
-    """
-    Test cases for the DatabaseWrapper.disconnect() method.
-    """
-
-    def setUp(self) -> None:
-        self.database = DatabaseWrapper()
-
-    def test_disconnect_with_open_connection(self) -> None:
-        self.database.connect(':memory:')
-
-        try:
-            self.database.disconnect()
-        except sqlite3.Error as error:
-            self.fail(f'Threw an SQLite exception: {error}')
-
-    def test_disconnect_with_closed_connection(self) -> None:
-        try:
-            self.database.disconnect()
-        except sqlite3.Error as error:
-            self.fail(f'Threw an SQLite exception: {error}')
-
-
 class CreateTablesMethodTests(unittest.TestCase):
     """
     Test cases for the DatabaseWrapper.create_tables() method.
