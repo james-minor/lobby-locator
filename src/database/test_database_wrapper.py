@@ -1,8 +1,5 @@
-import os
 import sqlite3
-import tempfile
 import unittest
-from unittest.mock import patch
 
 from src.database.create_connection import create_connection
 from .database_wrapper import DatabaseWrapper
