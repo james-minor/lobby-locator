@@ -3,42 +3,20 @@ from contextlib import closing
 from sqlite3 import Connection
 from typing import List
 
+from .connection import Connection
+
 
 class DatabaseWrapper:
     """Wrapper class to assist in communicating with the SQL database."""
 
-    connection: None | Connection
-    """The connection to the SQL database."""
-
-    def __init__(self):
-        self.connection = None
-
-    def connect(self, connection_string: str) -> bool:
+    def __init__(self, connection: Connection):
         """
-        Creates a connection to an SQLite database via the passed connection_string parameter.
+        Initializes the DatabaseWrapper class.
 
-        :param connection_string: The connection string for the database.
-        :return: True if the connection was successful, False otherwise.
+        :param connection: The connection to the SQLite database.
         """
 
-        # Attempting to cleanly open an SQLite connection.
-        try:
-            self.connection = sqlite3.connect(connection_string)
-        except sqlite3.Error as error:
-            print(f'SQLite error while creating database connection: {error}')
-            self.disconnect()  # Cleaning up active connection if error thrown.
-
-            return False
-
-        return True
-
-    def disconnect(self) -> None:
-        """Safely closes the SQLite database connection."""
-
-        if self.connection:
-            self.connection.commit()
-            self.connection.close()
-            self.connection = None
+        self.connection: Connection = connection
 
     def create_tables(self) -> bool:
         """
@@ -47,8 +25,8 @@ class DatabaseWrapper:
         :return: True if the tables were created successfully, False otherwise.
         """
 
-        # Safeguard if a connection is not open.
-        if self.connection is None:
+        # Safeguard if the connection is not open.
+        if not self.connection.is_open():
             return False
 
         # Creating the SQL tables.
@@ -89,9 +67,9 @@ class DatabaseWrapper:
         :return: The number of steam apps added to the database.
         """
 
-        # Safeguard if a connection is not open.
-        if self.connection is None:
-            return 0
+        # Safeguard if the connection is not open.
+        if not self.connection.is_open():
+            return False
 
         with self.connection:
 
