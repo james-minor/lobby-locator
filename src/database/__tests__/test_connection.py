@@ -3,7 +3,7 @@ import unittest
 from src.database.connection import Connection
 
 
-class DisconnectMethodTests(unittest.TestCase):
+class CloseMethodTests(unittest.TestCase):
     """
     Test cases for the Connection.disconnect() method.
     """
@@ -11,12 +11,12 @@ class DisconnectMethodTests(unittest.TestCase):
     def setUp(self) -> None:
         self.connection: Connection = Connection(':memory:')
 
-    def test_disconnect_on_open_connection(self):
-        self.assertTrue(self.connection.disconnect())
+    def test_close_on_open_connection(self):
+        self.assertTrue(self.connection.close())
 
-    def test_disconnect_on_closed_connection(self):
+    def test_close_on_closed_connection(self):
         self.connection.close()
-        self.assertFalse(self.connection.disconnect())
+        self.assertFalse(self.connection.close())
 
 
 class IsOpenMethodTests(unittest.TestCase):
@@ -30,6 +30,6 @@ class IsOpenMethodTests(unittest.TestCase):
     def test_after_initialization(self) -> None:
         self.assertTrue(self.connection.is_open())
 
-    def test_after_disconnect(self) -> None:
-        self.connection.disconnect()
+    def test_after_close(self) -> None:
+        self.connection.close()
         self.assertFalse(self.connection.is_open())

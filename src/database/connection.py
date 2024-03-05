@@ -14,9 +14,10 @@ class Connection(sqlite3.Connection):
         Is the connection to the database currently open?
         """
 
-    def disconnect(self) -> bool:
+    def close(self) -> bool:
         """
-        Safely closes the database connection, committing any pending transactions before doing so.
+        Gracefully closes the database connection, committing any pending transactions before doing so. Overrides the
+        sqlite3.Connection.close() method.
 
         :return: True if the disconnect was successful, False otherwise.
         """
@@ -28,7 +29,7 @@ class Connection(sqlite3.Connection):
             return False
 
         self._is_open = False
-        self.close()
+        super().close()
         return True
 
     def is_open(self) -> bool:
