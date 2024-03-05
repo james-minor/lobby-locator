@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+from src.database.create_connection import create_connection
 from .database_wrapper import DatabaseWrapper
 
 
@@ -73,17 +74,16 @@ class CreateTablesMethodTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.database = DatabaseWrapper()
-        self.database.connect('')
+        self.database = DatabaseWrapper(create_connection(':memory:'))
 
-    def test_creating_tables(self) -> None:
+    def test_calling_with_open_connection(self) -> None:
         try:
             self.database.create_tables()
         except sqlite3.Error as error:
             self.fail(f'Threw an SQLite exception: {error}')
 
     def test_calling_with_closed_connection(self) -> None:
-        self.database.disconnect()
+        self.database.connection.close()
 
         try:
             self.database.create_tables()
@@ -97,8 +97,7 @@ class UpdateSteamAppsTableMethodTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.database = DatabaseWrapper()
-        self.database.connect('')
+        self.database = DatabaseWrapper(create_connection(':memory:'))
         self.database.create_tables()
 
     def test_valid_dictionary(self) -> None:
@@ -115,7 +114,7 @@ class UpdateSteamAppsTableMethodTests(unittest.TestCase):
         self.assertEqual(row_count, 0)
 
     def test_calling_with_closed_connection(self) -> None:
-        self.database.disconnect()
+        self.database.connection.close()
         row_count = self.database.update_steam_apps_table({1: 'app_1'})
         self.assertEqual(row_count, 0)
 
@@ -126,8 +125,7 @@ class SetSteamIDMethodTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.database = DatabaseWrapper()
-        self.database.connect('')
+        self.database = DatabaseWrapper(create_connection(':memory:'))
         self.database.create_tables()
 
     def test_inserting_steam_id(self) -> None:
