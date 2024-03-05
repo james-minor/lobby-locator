@@ -28,7 +28,7 @@ class CreateConnectionFunctionTests(unittest.TestCase):
             self.fail('Connection was not created.')
 
         # Cleaning up the temporary file.
-        connection.disconnect()
+        connection.close()
         temp_file_handle.close()
         os.unlink(temp_file_path)
 
