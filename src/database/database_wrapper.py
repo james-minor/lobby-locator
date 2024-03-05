@@ -52,8 +52,8 @@ class DatabaseWrapper:
             return False
 
         # Creating the SQL tables.
-        with closing(self.connection.cursor()) as cursor:
-            cursor.executescript(
+        with self.connection:
+            self.connection.executescript(
                 """
                 -- Table to hold user data.
                 CREATE TABLE IF NOT EXISTS tb_users (
@@ -93,13 +93,13 @@ class DatabaseWrapper:
         if self.connection is None:
             return 0
 
-        with closing(self.connection.cursor()) as cursor:
+        with self.connection:
 
             # Getting the initial table size.
-            table_start_size = cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
+            table_start_size = self.connection.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
 
             # Inserting new data into the steam games table.
-            cursor.executemany(
+            self.connection.executemany(
                 '''
                     INSERT OR IGNORE INTO tb_steam_apps(steam_app_id, game_title) 
                     VALUES (?, ?)
@@ -110,7 +110,7 @@ class DatabaseWrapper:
             # Committing the transaction to prevent the database from locking.
             self.connection.commit()
 
-            return cursor.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
+            return self.connection.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
 
     def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> bool:
         """
@@ -128,9 +128,9 @@ class DatabaseWrapper:
         if steam_user_id == '':
             raise ValueError('Parameter steam_id cannot be empty string.')
 
-        with closing(self.connection.cursor()) as cursor:
+        with self.connection:
             try:
-                cursor.execute(
+                self.connection.execute(
                     '''
                     INSERT INTO tb_users (discord_id, steam_user_id)
                     VALUES (?, ?)
