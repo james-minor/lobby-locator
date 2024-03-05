@@ -14,18 +14,17 @@ class SteamAPIHandler:
     The root for the Steam API.
     """
 
-    _api_key: str
-    """
-    The Steam API key.
-    """
-
     def __init__(self, api_key: str):
         """
         Constructor for the SteamAPIHandler class.
 
         :param api_key: The Steam API key to connect to Steam with.
         """
+
         self._api_key = api_key
+        """
+        The Steam API key.
+        """
 
     def is_valid_id(self, steam_id: str) -> bool:
         """
