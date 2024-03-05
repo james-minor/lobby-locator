@@ -144,6 +144,32 @@ class DatabaseWrapper:
 
         return True
 
-        # Committing and closing cursor.
-        self.connection.commit()
-        cursor.close()
+    def update_owned_games_table(self, steam_apps: List[int], steam_user_id: str) -> int:
+        """
+        Inserts Steam application IDs into the owned games table.
+
+        :param steam_apps: A list of Steam application IDs to insert into the table.
+        :param steam_user_id: The Steam ID of the user who owns the games in the steam_apps list.
+        :return: The number of games inserted into the owned games table.
+        """
+
+        with self.connection:
+
+            # Getting the initial table size.
+            table_start_size = self.connection.execute('SELECT COUNT(id) FROM tb_owned_games').fetchone()[0]
+
+            # Inserting the steam app data into the table.
+            for steam_app_id in steam_apps:
+                self.connection.execute(
+                    '''
+                        INSERT OR IGNORE INTO tb_owned_games (steam_app_id, steam_user_id) 
+                        VALUES (?, ?)
+                    ''',
+                    [
+                        steam_app_id,
+                        steam_user_id
+                    ]
+                )
+
+            return self.connection.execute('SELECT COUNT(id) FROM tb_owned_games').fetchone()[0] - table_start_size
+
