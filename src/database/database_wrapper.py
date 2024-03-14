@@ -16,6 +16,24 @@ class DatabaseWrapper:
 
         self.connection: Connection = connection
 
+    def _get_table_rows(self, table: str) -> int:
+        """
+        Gets the amount of rows in a database table. Note that due to how the table string needs to be concatenated in
+        the statement string, this method is vulnerable to SQLite injection, use with caution.
+
+        :param table: The table to get the rowcount of.
+        :return: The amount of rows in the table.
+        """
+
+        if not self.connection.is_open():
+            return 0
+
+        with self.connection:
+            try:
+                return self.connection.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]
+            except sqlite3.Error:
+                return 0
+
     def create_tables(self) -> bool:
         """
         Creates the tables in the database.
