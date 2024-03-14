@@ -52,6 +52,14 @@ class DatabaseWrapper:
                     FOREIGN KEY (steam_app_id) REFERENCES tb_steam_apps(steam_app_id),
                     FOREIGN KEY (steam_user_id) REFERENCES tb_users(steam_user_id)
                 );
+                
+                -- Table to hold autocomplete data for games owned by registered users.
+                CREATE TABLE IF NOT EXISTS tb_games_autocomplete(
+                    steam_app_id INTEGER PRIMARY KEY,
+                    game_title VARCHAR(100) NOT NULL UNIQUE,
+                    FOREIGN KEY (steam_app_id) REFERENCES tb_steam_apps(steam_app_id),
+                    FOREIGN KEY (game_title) REFERENCES tb_steam_apps(game_title)
+                );
                 """
             )
 
