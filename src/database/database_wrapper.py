@@ -1,6 +1,4 @@
 import sqlite3
-from contextlib import closing
-from sqlite3 import Connection
 from typing import List
 
 from .connection import Connection
