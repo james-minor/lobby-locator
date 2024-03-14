@@ -98,7 +98,7 @@ class DatabaseWrapper:
         with self.connection:
 
             # Getting the initial table size.
-            table_start_size = self.connection.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0]
+            table_start_size = self._get_table_rows('tb_steam_apps')
 
             # Inserting new data into the steam games table.
             self.connection.executemany(
@@ -112,7 +112,7 @@ class DatabaseWrapper:
             # Committing the transaction to prevent the database from locking.
             self.connection.commit()
 
-            return self.connection.execute('SELECT COUNT(steam_app_id) FROM tb_steam_apps').fetchone()[0] - table_start_size
+            return self._get_table_rows('tb_steam_apps') - table_start_size
 
     def set_steam_user_id(self, discord_id: str, steam_user_id: str) -> bool:
         """
@@ -158,7 +158,7 @@ class DatabaseWrapper:
         with self.connection:
 
             # Getting the initial table size.
-            table_start_size = self.connection.execute('SELECT COUNT(id) FROM tb_owned_games').fetchone()[0]
+            table_start_size = self._get_table_rows('tb_owned_games')
 
             # Inserting the steam app data into the table.
             for steam_app_id in steam_apps:
@@ -173,5 +173,6 @@ class DatabaseWrapper:
                     ]
                 )
 
-            return self.connection.execute('SELECT COUNT(id) FROM tb_owned_games').fetchone()[0] - table_start_size
+            return self._get_table_rows('tb_owned_games') - table_start_size
+
 
