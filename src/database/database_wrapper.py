@@ -122,7 +122,7 @@ class DatabaseWrapper:
 
     def update_owned_games_table(self, steam_apps: List[int], steam_user_id: str) -> int:
         """
-        Inserts Steam application IDs into the owned games table.
+        Inserts a users owned games into the owned games table.
 
         :param steam_apps: A list of Steam application IDs to insert into the table.
         :param steam_user_id: The Steam ID of the user who owns the games in the steam_apps list.
