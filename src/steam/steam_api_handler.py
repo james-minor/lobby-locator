@@ -53,28 +53,36 @@ class SteamAPIHandler:
     def get_id_from_url(self, steam_url: str) -> str:
         """
         Converts a Steam Profile URL to a Steam ID. Can accept both vanity and default steam profiles,
-        for example both of the following are considered valid Steam profile URLs:
+        for example all the following are considered valid Steam profile URLs:
 
         https://steamcommunity.com/id/_M1nor
-
+        https://www.steamcommunity.com/id/_M1nor
         https://steamcommunity.com/profiles/76561198103635351
 
         :param steam_url: The Steam profile URL to convert.
         :return: A Steam ID string, if no Steam ID could be resolved an empty string is returned.
         """
 
+        trimmed_url = steam_url
+
         # Trimming the trailing slash from the URL, if it exists.
-        if steam_url.endswith('/'):
-            trimmed_url = steam_url[:-1]
-        else:
-            trimmed_url = steam_url
+        if trimmed_url.endswith('/'):
+            trimmed_url = trimmed_url[:-1]
+
+        # Removing "https://" from the URL, if it exists.
+        if trimmed_url.startswith('https://'):
+            trimmed_url = trimmed_url[8:]
+
+        # Removing "www." from the URL, if it exists.
+        if trimmed_url.startswith('www.'):
+            trimmed_url = trimmed_url[4:]
 
         # If a non-custom Steam URL is set, returns the ID within the URL.
-        if trimmed_url.startswith('https://steamcommunity.com/profiles/'):
+        if trimmed_url.startswith('steamcommunity.com/profiles/'):
             return trimmed_url.split('/')[-1]
 
         # If there is a custom Steam profile URL.
-        if trimmed_url.startswith('https://steamcommunity.com/id/'):
+        if trimmed_url.startswith('steamcommunity.com/id/'):
             vanity_url = trimmed_url.split('/')[-1]
             request_uri = f'{self._api_root}/ISteamUser/ResolveVanityURL/v1/?key={self._api_key}&vanityurl={vanity_url}'
 
