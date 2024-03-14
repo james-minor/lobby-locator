@@ -94,6 +94,30 @@ class GetIDFromURLMethodTests(unittest.TestCase):
         steam_id = self.steam_api.get_id_from_url('')
         self.assertEqual(steam_id, '')
 
+    def test_url_with_id_with_no_https(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('steamcommunity.com/profiles/76561198103635351/')
+        self.assertEqual(steam_id, '76561198103635351')
+
+    def test_url_with_id_with_www(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('https://www.steamcommunity.com/profiles/76561198103635351/')
+        self.assertEqual(steam_id, '76561198103635351')
+
+    def test_url_with_id_with_www_no_https(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('www.steamcommunity.com/profiles/76561198103635351/')
+        self.assertEqual(steam_id, '76561198103635351')
+
+    def test_vanity_url_with_no_https(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('steamcommunity.com/id/_M1nor')
+        self.assertEqual(steam_id, '76561198103635351')
+
+    def test_vanity_url_with_www(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('https://www.steamcommunity.com/id/_M1nor')
+        self.assertEqual(steam_id, '76561198103635351')
+
+    def test_vanity_url_with_www_no_https(self) -> None:
+        steam_id = self.steam_api.get_id_from_url('www.steamcommunity.com/id/_M1nor')
+        self.assertEqual(steam_id, '76561198103635351')
+
 
 class FetchAppListMethodTests(unittest.TestCase):
     """
