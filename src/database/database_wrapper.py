@@ -83,6 +83,47 @@ class DatabaseWrapper:
 
         return True
 
+    def create_triggers(self) -> bool:
+        """
+        Creates triggers for the database.
+
+        :return: True if the triggers were created successfully, False otherwise.
+        """
+
+        # Safeguard if the connection is not open.
+        if not self.connection.is_open():
+            return False
+
+        # Creating the SQL triggers.
+        with self.connection:
+            self.connection.executescript(
+                """
+                -- Trigger to add games to the autocomplete table when owned games are added.
+                CREATE TRIGGER IF NOT EXISTS tr_add_games_autocomplete 
+                AFTER INSERT ON tb_owned_games
+                BEGIN
+                    INSERT OR IGNORE INTO tb_games_autocomplete (steam_app_id, game_title)
+                    SELECT NEW.steam_app_id, game_title
+                    FROM tb_steam_apps
+                    WHERE tb_steam_apps.steam_app_id = NEW.steam_app_id;
+                END;
+
+                -- Trigger to remove games in the autocomplete table when owned games are deleted.
+                CREATE TRIGGER IF NOT EXISTS tr_remove_games_autocomplete
+                AFTER DELETE ON tb_owned_games
+                BEGIN
+                    DELETE FROM tb_games_autocomplete
+                    WHERE steam_app_id = OLD.steam_app_id
+                    AND NOT EXISTS (
+                        SELECT 1 FROM tb_owned_games
+                        WHERE steam_app_id = OLD.steam_app_id
+                    );
+                END;
+                """
+            )
+
+        return True
+
     def update_steam_apps_table(self, steam_apps: dict[int, str]) -> int:
         """
         Updates the Steam apps table.
