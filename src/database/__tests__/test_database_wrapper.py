@@ -2,7 +2,7 @@ import sqlite3
 import unittest
 
 from src.database.create_connection import create_connection
-from .database_wrapper import DatabaseWrapper
+from src.database.database_wrapper import DatabaseWrapper
 
 
 class GetTableRowsMethodTests(unittest.TestCase):
