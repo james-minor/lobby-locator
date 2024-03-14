@@ -5,6 +5,31 @@ from src.database.create_connection import create_connection
 from .database_wrapper import DatabaseWrapper
 
 
+class GetTableRowsMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper._get_table_rows method.
+    """
+
+    def setUp(self):
+        self.database = DatabaseWrapper(create_connection(':memory:'))
+
+    def test_table_has_no_entries(self):
+        self.database.create_tables()
+        self.assertEqual(self.database._get_table_rows('tb_steam_apps'), 0)
+
+    def test_table_has_entries(self):
+        self.database.create_tables()
+        self.database.update_steam_apps_table({1: 'app_1', 2: 'app_2', 3: 'app_3'})
+        self.assertEqual(self.database._get_table_rows('tb_steam_apps'), 3)
+
+    def test_table_not_created(self):
+        self.assertEqual(self.database._get_table_rows('tb_steam_apps'), 0)
+
+    def test_connection_closed_connection(self):
+        self.database.connection.close()
+        self.assertEqual(self.database._get_table_rows('tb_steam_apps'), 0)
+
+
 class CreateTablesMethodTests(unittest.TestCase):
     """
     Test cases for the DatabaseWrapper.create_tables() method.
