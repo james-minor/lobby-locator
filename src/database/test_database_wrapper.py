@@ -106,4 +106,37 @@ class SetSteamIDMethodTests(unittest.TestCase):
             self.database.set_steam_user_id('', '')
 
     def tearDown(self) -> None:
-        self.database.disconnect()
+        self.database.connection.close()
+
+
+class UpdateOwnedGamesTableMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.update_owned_games_table() method.
+    """
+
+    def setUp(self) -> None:
+        self.database = DatabaseWrapper(create_connection(':memory:'))
+        self.database.create_tables()
+
+        self.database.update_steam_apps_table({
+            1: 'test_entry_1',
+            2: 'test_entry_2',
+            3: 'test_entry_3',
+            4: 'test_entry_4',
+            5: 'test_entry_5',
+        })
+
+        self.database.set_steam_user_id('1', '1')
+
+    def test_inserting_new_entries(self) -> None:
+        games_inserted = self.database.update_owned_games_table([1, 2], '1')
+        self.assertEqual(games_inserted, 2)
+
+    def test_inserting_existing_entries(self) -> None:
+        self.database.update_owned_games_table([1, 2], '1')
+        games_inserted = self.database.update_owned_games_table([1, 2], '1')
+        self.assertEqual(games_inserted, 0)
+
+    def test_inserting_empty_list(self) -> None:
+        games_inserted = self.database.update_owned_games_table([], '1')
+        self.assertEqual(games_inserted, 0)
