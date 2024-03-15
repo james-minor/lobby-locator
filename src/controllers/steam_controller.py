@@ -34,7 +34,7 @@ class SteamController(Controller):
         Handles the business logic for the /steam remove command.
         """
 
-        raise NotImplementedError
+        self.bot.database.remove_user(discord_id)
 
     def refresh_command(self, discord_id: str):
         """

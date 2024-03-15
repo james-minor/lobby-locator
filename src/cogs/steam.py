@@ -71,7 +71,12 @@ class Steam(commands.Cog):
         :param ctx: The context that the interaction was invoked in.
         """
 
-        raise NotImplementedError
+        self.controller.remove_command(str(ctx.interaction.user.id))
+        await ctx.respond(
+            'I successfully removed your data from the database!',
+            delete_after=15,
+            ephemeral=True
+        )
 
     @steam_cmd_group.command(
         name='refresh',

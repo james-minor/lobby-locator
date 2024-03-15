@@ -216,4 +216,14 @@ class DatabaseWrapper:
 
             return self._get_table_rows('tb_owned_games') - table_start_size
 
+    def remove_user(self, discord_id: str) -> None:
+        """
+        Removes a user, and all of their associated data, from the database.
+
+        :param discord_id: The Discord ID of the user to remove.
+        """
+        with self.connection as connection:
+            connection.execute('DELETE FROM tb_users WHERE discord_id = ?', [discord_id])
+
+
 
