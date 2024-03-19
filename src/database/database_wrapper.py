@@ -119,6 +119,13 @@ class DatabaseWrapper:
                         WHERE steam_app_id = OLD.steam_app_id
                     );
                 END;
+                
+                -- Trigger to cascade user deletions to owned games.
+                CREATE TRIGGER IF NOT EXISTS tr_remove_owned_games
+                BEFORE DELETE ON tb_users
+                BEGIN
+                    DELETE FROM tb_owned_games WHERE steam_user_id = OLD.steam_user_id;
+                END;
                 """
             )
 
