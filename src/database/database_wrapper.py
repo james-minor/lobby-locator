@@ -232,5 +232,24 @@ class DatabaseWrapper:
         with self.connection as connection:
             connection.execute('DELETE FROM tb_users WHERE discord_id = ?', [discord_id])
 
+    def get_steam_id(self, discord_id: str) -> str | None:
+        """
+        Gets the Steam ID for a Discord user in the database.
 
+        :param discord_id: The Discord ID of the user to lookup.
+        :return: The Steam ID of the user. If no steam ID was found returns None.
+        """
 
+        with self.connection as connection:
+            steam_id = connection.execute(
+                '''
+                    SELECT (steam_user_id) FROM tb_users 
+                    WHERE discord_id = ?
+                ''',
+                [discord_id]
+            ).fetchone()
+
+            if steam_id is None:
+                return None
+
+            return steam_id[0]

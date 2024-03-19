@@ -165,3 +165,28 @@ class UpdateOwnedGamesTableMethodTests(unittest.TestCase):
     def test_inserting_empty_list(self) -> None:
         games_inserted = self.database.update_owned_games_table([], '1')
         self.assertEqual(games_inserted, 0)
+
+
+class GetSteamIdMethodTests(unittest.TestCase):
+    """
+    Test cases for the DatabaseWrapper.update_owned_games_table() method.
+    """
+
+    def setUp(self) -> None:
+        self.database = DatabaseWrapper(create_connection(':memory:'))
+        self.database.create_tables()
+
+    def test_empty_users_table(self) -> None:
+        self.assertIsNone(self.database.get_steam_id('1'))
+
+    def test_matching_discord_id(self) -> None:
+        self.database.set_steam_user_id('1', '1')
+        self.assertEqual('1', self.database.get_steam_id('1'))
+
+    def test_non_matching_discord_id(self) -> None:
+        self.database.set_steam_user_id('2', '1')
+        self.assertIsNone(self.database.get_steam_id('1'))
+
+    def test_empty_discord_id(self) -> None:
+        self.database.set_steam_user_id('1', '1')
+        self.assertIsNone(self.database.get_steam_id(''))
